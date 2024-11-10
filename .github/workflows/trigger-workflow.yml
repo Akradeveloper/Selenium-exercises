@@ -13,6 +13,6 @@ jobs:
       - name: Ejecutar workflow de validación en Validator
         run: |
           curl -X POST \
-          -H "Authorization: token ${{ secrets.MY_GITHUB_PAT }}" \
+          -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
           -d '${{ github.head_ref }}' \
           https://api.github.com/repos/Akradeveloper/Validator/actions/workflows/validate.yml/dispatches
