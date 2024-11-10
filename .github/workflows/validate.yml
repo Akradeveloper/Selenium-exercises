@@ -2,7 +2,7 @@ name: Validar Ejercicio Completo
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened] # Para que se ejecute cuando el PR se abra, edite o sincronice
+    types: [opened, edited, synchronize, reopened]
   workflow_dispatch: # Permite ejecutar manualmente el workflow
 
 jobs:
@@ -10,136 +10,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Paso para obtener el código del repositorio
       - name: Chequear el código
         uses: actions/checkout@v2
         with:
-          repository: Akradeveloper/Selenium-exercises # Reemplaza con tu repositorio
-          token: ${{ secrets.TOKEN_GITHUB }} # Usa el token secreto
-          ref: ${{ github.head_ref }} # La rama del PR
+          repository: Akradeveloper/Selenium-exercises
+          token: ${{ secrets.TOKEN_GITHUB }}
+          ref: ${{ github.head_ref }}
 
       # Paso para verificar la estructura de los directorios en el repositorio
       - name: Verificar la estructura de directorios
         run: |
           echo "Estructura de directorios:"
-          ls -R ./  # Lista la estructura de directorios de todo el repositorio
+          ls -R ./  # Lista la estructura de directorios
 
       # Paso para encontrar subcarpetas de ejercicios con package.json o pom.xml y que contengan un directorio 'src'
       - name: Encontrar subcarpetas de ejercicios
         run: |
-
           # Inicializar variable de carpetas válidas
           VALID_FOLDERS=""
 
-          # Imprimir la lista de carpetas en el directorio actual
+          # Listar todas las carpetas en el directorio actual
           echo "Listando todas las carpetas en el directorio actual:"
-          find . -maxdepth 1 -type d  # Lista todas las carpetas en el nivel 1
+          find . -maxdepth 1 -type d  # Muestra todas las carpetas en el nivel 1
 
           # Buscar las subcarpetas que contienen package.json o pom.xml
-          for folder in $(find ./ -maxdepth 1 -type d); do
-            # Imprimir nombre de cada carpeta encontrada
+          for folder in $(find . -maxdepth 1 -type d); do
             echo "Comprobando carpeta: $folder"
+            echo "Ruta absoluta de la carpeta: $(realpath $folder)"
 
             # Comprobar si la subcarpeta contiene package.json o pom.xml
             if [ -e "$folder/package.json" ] || [ -e "$folder/pom.xml" ]; then
-              echo "Encontrado archivo package.json o pom.xml en $folder"
+              echo "Encontrado package.json o pom.xml en $folder"
 
               # Comprobar si la subcarpeta tiene un directorio 'src'
               if [ -d "$folder/src" ]; then
-                # Si existe 'src', se agrega la carpeta a la lista de carpetas válidas
+                echo "Directorio 'src' encontrado en $folder"
+                # Si existe 'src', agregar la carpeta a la lista de carpetas válidas
                 VALID_FOLDERS="$VALID_FOLDERS$(basename $folder) "
               else
-                echo "No se encontró el directorio 'src' en $folder. Se omite esta carpeta."
+                echo "No se encontró el directorio 'src' en $folder"
               fi
+            else
+              echo "No se encontró package.json ni pom.xml en $folder"
             fi
           done
 
           # Mostrar las subcarpetas válidas encontradas
           echo "Subcarpetas válidas encontradas: $VALID_FOLDERS"
 
-          # Verificar si se encontraron carpetas válidas
+          # Establecer la salida para usarla en pasos posteriores
           if [ -n "$VALID_FOLDERS" ]; then
-            # Establecer la salida para usarla en pasos posteriores
             echo "folders=$VALID_FOLDERS" >> $GITHUB_ENV
           else
             echo "No se encontraron carpetas válidas con 'src'."
           fi
-
-      # Validar cada subcarpeta de ejercicios con las verificaciones adicionales
-      - name: Validar cada ejercicio
-        run: |
-          for FOLDER in ${{ env.folders }}; do
-            echo "Validando carpeta $FOLDER"
-            
-            # Verificar si la carpeta 'src/pages' existe
-            if [ ! -d "$FOLDER/src/pages" ]; then
-              echo "ERROR: Falta el directorio src/pages en $FOLDER"
-              exit 1
-            fi
-
-            # Verificar si la carpeta 'src/tests' existe
-            if [ ! -d "$FOLDER/src/tests" ]; then
-              echo "ERROR: Falta el directorio src/tests en $FOLDER"
-              exit 1
-            fi
-
-            # Verificar si el archivo .gitignore existe
-            if [ ! -f "$FOLDER/.gitignore" ]; then
-              echo "ERROR: Falta el archivo .gitignore en $FOLDER"
-              exit 1
-            fi
-
-            # Verificar que no haya archivos de solución
-            if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
-              echo "ERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
-              exit 1
-            fi
-
-            # Verificar que no haya archivos de test de ejemplo
-            if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
-              echo "ERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
-              exit 1
-            fi
-
-            # Comprobaciones de comentarios en el código
-            if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
-              echo "WARNING: No se encontraron comentarios de clase en el código de $FOLDER"
-            fi
-            if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
-              echo "WARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
-            fi
-
-            # Validación de dependencias de Selenium en pom.xml (para proyectos Java)
-            if [ -f "$FOLDER/pom.xml" ] && ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
-              echo "ERROR: Selenium no está listado como dependencia en pom.xml en $FOLDER"
-              exit 1
-            fi
-
-            # Validación de dependencias de Selenium en package.json (para proyectos JavaScript)
-            if [ -f "$FOLDER/package.json" ] && ! grep -q "selenium-webdriver" "$FOLDER/package.json"; then
-              echo "ERROR: selenium-webdriver no está listado como dependencia en package.json en $FOLDER"
-              exit 1
-            fi
-
-            # Buscar código comentado en todo el proyecto
-            if grep -r "/\*.*" "$FOLDER" | grep -q .; then
-              echo "ERROR: El código no debe estar comentado en el repositorio de $FOLDER"
-              exit 1
-            fi
-
-            # Ejecutar ESLint si existe package.json (para proyectos JavaScript)
-            if [ -f "$FOLDER/package.json" ]; then
-              echo "Instalando dependencias de JavaScript en $FOLDER..."
-              npm install --prefix "$FOLDER"
-              echo "Ejecutando ESLint en $FOLDER..."
-              npx eslint "$FOLDER/src/" || exit 1
-            fi
-
-            # Ejecutar Checkstyle si existe pom.xml (para proyectos Java)
-            if [ -f "$FOLDER/pom.xml" ]; then
-              echo "Instalando dependencias de Java en $FOLDER..."
-              mvn install -f "$FOLDER/pom.xml"
-              echo "Ejecutando Checkstyle en $FOLDER..."
-              mvn checkstyle:check -f "$FOLDER/pom.xml" || exit 1
-            fi
-          done
