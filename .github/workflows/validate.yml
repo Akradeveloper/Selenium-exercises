@@ -23,11 +23,7 @@ jobs:
       # Encontrar las subcarpetas de ejercicios
       - name: Encontrar subcarpetas de ejercicios
         run: |
-           if [ ! -d "./Selenium-exercises" ]; then
-              echo "ERROR: No se encuentra la carpeta Selenium-exercises"
-              exit 1
-           fi
-           EXERCISE_FOLDERS=$(find ./Selenium-exercises/* -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -exec basename {} \;)
+           EXERCISE_FOLDERS=$(find ./* -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -exec basename {} \;)
               echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
               echo "::set-output name=folders::$EXERCISE_FOLDERS"
 
