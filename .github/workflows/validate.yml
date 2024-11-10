@@ -31,7 +31,7 @@ jobs:
           VALID_FOLDERS=""
 
           # Buscar las subcarpetas que contienen package.json o pom.xml
-          for folder in $(find ./ -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -exec basename {} \;); do
+          for folder in $(find ./ -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -exec basename {} \;); do
             # Comprobar si la subcarpeta tiene un directorio 'src'
             if [ -d "$folder/src" ]; then
               # Si existe 'src', se agrega la carpeta a la lista de carpetas válidas
