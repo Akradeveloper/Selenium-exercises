@@ -2,9 +2,6 @@ name: Validar Ejercicio
 
 on:
   pull_request:
-    # Este evento se dispara para cualquier PR, pero agregaremos una validación en los pasos
-    branches:
-      - "main"  # O la rama principal que quieras, por ejemplo, 'develop'
   workflow_dispatch:  # Para poder ejecutarlo manualmente
 
 jobs:
