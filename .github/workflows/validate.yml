@@ -2,8 +2,8 @@ name: Validar Ejercicio Completo
 
 on:
   pull_request:
-    paths:
-      - "Selenium-exercises/**" # Detecta cambios en cualquier archivo dentro de 'Selenium-exercises'
+    # Este evento se dispara para cualquier PR en cualquier rama
+    types: [opened, edited, synchronize,reopened]  # Para que se ejecute cuando el PR se abra, edite o sincronice
 
   workflow_dispatch:
 
