@@ -2,27 +2,42 @@ name: Validar Ejercicio
 
 on:
   pull_request:
-    paths:
-      - "Selenium-exercises/**"  # Detecta cambios en cualquier archivo dentro de 'Selenium-exercises'
-  workflow_dispatch:
+    # Este evento se dispara para cualquier PR, pero agregaremos una validación en los pasos
+    branches:
+      - "main"  # O la rama principal que quieras, por ejemplo, 'develop'
+  workflow_dispatch:  # Para poder ejecutarlo manualmente
 
 jobs:
   validate:
     runs-on: ubuntu-latest
 
     steps:
+      # Paso para chequear el código
       - name: Chequear el código
         uses: actions/checkout@v2
         with:
           repository: Akradeveloper/Selenium-exercises
           token: ${{ secrets.TOKEN_GITHUB }}
-          submodules: recursive  # Asegurarse de que los submódulos también se descarguen
+          submodules: recursive  # Asegúrate de que los submódulos también se descarguen
 
+      # Paso para verificar el mensaje del PR
+      - name: Verificar mensaje del PR
+        run: |
+          PR_BODY="${{ github.event.pull_request.body }}"
+          if [[ "$PR_BODY" != *"VERIFY"* ]]; then
+            echo "ERROR: El mensaje del PR no contiene la palabra 'VERIFY'."
+            exit 1  # Termina el flujo de trabajo si no se encuentra 'VERIFY' en el mensaje del PR
+          else
+            echo "Mensaje del PR contiene 'VERIFY'. Procediendo con la validación."
+          fi
+
+      # Paso para verificar contenido de 'Selenium-exercises'
       - name: Verificar contenido de 'Selenium-exercises'
         run: |
           # Verifica si la carpeta 'Selenium-exercises' existe y muestra su contenido
           ls -R ./Selenium-exercises
 
+      # Encontrar las subcarpetas de ejercicios
       - name: Encontrar subcarpetas de ejercicios
         id: find_exercises
         run: |
