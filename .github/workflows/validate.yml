@@ -3,7 +3,7 @@ name: Validar Ejercicio
 on:
   pull_request:
     # Este evento se dispara para cualquier PR en cualquier rama
-    types: [opened, edited, synchronize]  # Para que se ejecute cuando el PR se abra, edite o sincronice
+    types: [opened, edited, synchronize, reopened]  # Para que se ejecute cuando el PR se abra, edite o sincronice
 
 jobs:
   validate:
