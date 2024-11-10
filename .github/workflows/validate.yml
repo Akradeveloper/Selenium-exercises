@@ -2,8 +2,8 @@ name: Validar Ejercicio Completo
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
-  workflow_dispatch:
+    types: [opened, edited, synchronize, reopened] # Para que se ejecute cuando el PR se abra, edite o sincronice
+  workflow_dispatch: # Permite ejecutar manualmente el workflow
 
 jobs:
   validate:
@@ -14,43 +14,53 @@ jobs:
       - name: Chequear el código
         uses: actions/checkout@v2
         with:
-          repository: Akradeveloper/Selenium-exercises
-          token: ${{ secrets.TOKEN_GITHUB }}
+          repository: Akradeveloper/Selenium-exercises # Reemplaza con tu repositorio
+          token: ${{ secrets.TOKEN_GITHUB }} # Usa el token secreto
           ref: ${{ github.head_ref }} # La rama del PR
 
-      # Verificar la estructura de directorios
+      # Paso para verificar la estructura de los directorios en el repositorio
       - name: Verificar la estructura de directorios
         run: |
           echo "Estructura de directorios:"
-          ls -R ./  # Mostrar la estructura completa de directorios para depuración
+          ls -R ./  # Lista la estructura de directorios de todo el repositorio
 
-      # Encontrar subcarpetas que contienen package.json o pom.xml
+      # Paso para encontrar subcarpetas de ejercicios con package.json o pom.xml y que contengan un directorio 'src'
       - name: Encontrar subcarpetas de ejercicios
         run: |
           # Inicializar variable de carpetas válidas
           VALID_FOLDERS=""
 
           # Buscar las subcarpetas que contienen package.json o pom.xml
-          for folder in $(find ./ -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -exec basename {} \;); do
-            # Comprobar si la subcarpeta tiene un directorio 'src'
-            if [ -d "$folder/src" ]; then
-              # Si existe 'src', se agrega la carpeta a la lista de carpetas válidas
-              VALID_FOLDERS="$VALID_FOLDERS$folder "
-            else
-              echo "No se encontró el directorio 'src' en $folder. Se omite esta carpeta."
+          for folder in $(find ./ -maxdepth 1 -type d); do
+            # Comprobar si el folder contiene package.json o pom.xml
+            if [ -e "$folder/package.json" ] || [ -e "$folder/pom.xml" ]; then
+              # Extraer solo el nombre de la carpeta
+              folder_name=$(basename "$folder")
+
+              # Comprobar si la subcarpeta tiene un directorio 'src'
+              if [ -d "$folder/src" ]; then
+                # Si existe 'src', se agrega la carpeta a la lista de carpetas válidas
+                VALID_FOLDERS="$VALID_FOLDERS$folder_name "
+              else
+                echo "No se encontró el directorio 'src' en $folder_name. Se omite esta carpeta."
+              fi
             fi
           done
 
           # Mostrar las subcarpetas válidas encontradas
           echo "Subcarpetas válidas encontradas: $VALID_FOLDERS"
 
-          # Establecer la salida para usarla en pasos posteriores
-          echo "folders=$VALID_FOLDERS" >> $GITHUB_ENV
+          # Verificar si se encontraron carpetas válidas
+          if [ -n "$VALID_FOLDERS" ]; then
+            # Establecer la salida para usarla en pasos posteriores
+            echo "folders=$VALID_FOLDERS" >> $GITHUB_ENV
+          else
+            echo "No se encontraron carpetas válidas con 'src'."
+          fi
 
-      # Validar cada ejercicio
+      # Validar cada subcarpeta de ejercicios con las verificaciones adicionales
       - name: Validar cada ejercicio
         run: |
-          # Iterar sobre las carpetas válidas encontradas
           for FOLDER in ${{ env.folders }}; do
             echo "Validando carpeta $FOLDER"
             
