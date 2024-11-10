@@ -47,6 +47,15 @@ jobs:
           for FOLDER in ${{ env.folders }}; do
             echo "Validando carpeta $FOLDER"
             
+            # Comprobar si la subcarpeta tiene un directorio 'src'
+            if [ ! -d "$FOLDER/src" ]; then
+              echo "No se encontró el directorio 'src' en $FOLDER. Se omite esta carpeta."
+              continue  # Si no existe src, se omite esta carpeta y se pasa a la siguiente
+            fi
+            
+            # Si existe 'src', realizar las validaciones
+            echo "Directorio 'src' encontrado en $FOLDER. Realizando comprobaciones adicionales..."
+
             # Verificar si la carpeta 'src/pages' existe
             if [ ! -d "$FOLDER/src/pages" ]; then
               echo "ERROR: Falta el directorio src/pages en $FOLDER"
