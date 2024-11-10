@@ -27,7 +27,7 @@ jobs:
       # Paso para encontrar subcarpetas de ejercicios con package.json o pom.xml y que contengan un directorio 'src'
       - name: Encontrar subcarpetas de ejercicios
         run: |
-        
+
           # Inicializar variable de carpetas válidas
           VALID_FOLDERS=""
 
@@ -36,7 +36,7 @@ jobs:
           find . -maxdepth 1 -type d  # Lista todas las carpetas en el nivel 1
 
           # Buscar las subcarpetas que contienen package.json o pom.xml
-          for folder in $(find . -maxdepth 1 -type d); do
+          for folder in $(find . -type d); do
             # Imprimir nombre de cada carpeta encontrada
             echo "Comprobando carpeta: $folder"
 
