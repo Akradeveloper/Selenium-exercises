@@ -19,4 +19,4 @@ jobs:
             -H "Accept: application/vnd.github.v3+json" \
             -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
             -d '{}' \
-            https://api.github.com/repos/akradeveloper/Validator/actions/workflows/validation.yml/dispatches
+            https://api.github.com/repos/Akradeveloper/Validator/actions/workflows/validate.yml/dispatches
