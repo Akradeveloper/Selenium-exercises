@@ -27,6 +27,7 @@ jobs:
       # Paso para encontrar subcarpetas de ejercicios con package.json o pom.xml y que contengan un directorio 'src'
       - name: Encontrar subcarpetas de ejercicios
         run: |
+        
           # Inicializar variable de carpetas válidas
           VALID_FOLDERS=""
 
