@@ -31,7 +31,7 @@ jobs:
           VALID_FOLDERS=""
 
           # Buscar las subcarpetas que contienen package.json o pom.xml
-          for folder in $(find ./ -maxdepth 1 -type d); do
+          for folder in $(find ./ -type d); do
             # Comprobar si el folder contiene package.json o pom.xml
             if [ -e "$folder/package.json" ] || [ -e "$folder/pom.xml" ]; then
               # Extraer solo el nombre de la carpeta
