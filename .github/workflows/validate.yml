@@ -3,34 +3,40 @@ name: Validar Ejercicio
 on:
   pull_request:
     paths:
-      - "Selenium-exercises/**" # Detecta cambios en cualquier archivo dentro de 'Selenium-exercises'
-
-  workflow_dispatch: # Permite ejecutar manualmente el workflow
+      - "Selenium-exercises/**"  # Detecta cambios en cualquier archivo dentro de 'Selenium-exercises'
+  workflow_dispatch:
 
 jobs:
   validate:
     runs-on: ubuntu-latest
 
     steps:
-      # Paso 1: Obtener el código del repositorio
-      - name: Obtener código del repositorio de ejercicios
+      - name: Chequear el código
         uses: actions/checkout@v2
         with:
-          repository: Akradeveloper/Selenium-exercises # Reemplaza con tu repositorio
-          token: ${{ secrets.TOKEN_GITHUB }} # Usa el token secreto
-          ref: ${{ github.head_ref }} # La rama del PR
+          repository: Akradeveloper/Selenium-exercises
+          token: ${{ secrets.TOKEN_GITHUB }}
+          submodules: recursive  # Asegurarse de que los submódulos también se descarguen
 
-      # Paso 2: Encontrar subcarpetas de ejercicios con proyectos Java o JavaScript
+      - name: Verificar contenido de 'Selenium-exercises'
+        run: |
+          # Verifica si la carpeta 'Selenium-exercises' existe y muestra su contenido
+          ls -R ./Selenium-exercises
+
       - name: Encontrar subcarpetas de ejercicios
         id: find_exercises
         run: |
-          # Busca todas las subcarpetas dentro de 'Selenium-exercises' que contienen package.json o pom.xml
-          EXERCISE_FOLDERS=$(find ./Selenium-exercises/* -type d -exec test -e "{}/package.json" -o -e "{}/pom.xml" \; -print)
+          # Verificar si la carpeta Selenium-exercises existe
+          if [ ! -d "./Selenium-exercises" ]; then
+            echo "ERROR: No se encuentra la carpeta Selenium-exercises"
+            exit 1
+          fi
+          # Buscar las subcarpetas que contienen package.json o pom.xml
+          EXERCISE_FOLDERS=$(find ./Selenium-exercises/* -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -print)
           echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
           echo "::set-output name=folders::$EXERCISE_FOLDERS"
 
-
-      # Paso 3: Validar cada subcarpeta de ejercicios
+      # Validar cada ejercicio encontrado
       - name: Validar cada ejercicio
         run: |
           for FOLDER in ${{ steps.find_exercises.outputs.folders }}; do
@@ -84,7 +90,7 @@ jobs:
               exit 1
             fi
 
-            # Ejecución de ESLint si es un proyecto JavaScript
+            # Ejecución de ESLint si existe package.json
             if [ -f "$FOLDER/package.json" ]; then
               echo "Instalando dependencias de JavaScript en $FOLDER..."
               npm install --prefix "$FOLDER"
@@ -92,7 +98,7 @@ jobs:
               npx eslint "$FOLDER/src/" || exit 1
             fi
 
-            # Ejecución de Checkstyle si es un proyecto Java
+            # Ejecución de Checkstyle si existe pom.xml
             if [ -f "$FOLDER/pom.xml" ]; then
               echo "Instalando dependencias de Java en $FOLDER..."
               mvn install -f "$FOLDER/pom.xml"
