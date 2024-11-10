@@ -2,9 +2,10 @@ name: Validar Ejercicio Completo
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]  # Para que se ejecute cuando el PR se abra, edite o sincronice
+    # Este evento se dispara para cualquier PR en cualquier rama
+    types: [opened, edited, synchronize, reopened] # Para que se ejecute cuando el PR se abra, edite o sincronice
 
-  workflow_dispatch:  # Para ejecución manual
+  workflow_dispatch:
 
 jobs:
   validate:
@@ -19,28 +20,30 @@ jobs:
           token: ${{ secrets.TOKEN_GITHUB }}
           ref: ${{ github.head_ref }} # La rama del PR
 
-      # Paso para verificar la estructura de los directorios en el repositorio
+      # Verificar la estructura de directorios
       - name: Verificar la estructura de directorios
         run: |
           echo "Estructura de directorios:"
-          ls -R ./  # Muestra todos los archivos y directorios
+          ls -R ./  # Mostrar la estructura completa de directorios para depuración
 
-      # Paso para encontrar subcarpetas que contienen package.json o pom.xml
+      # Encontrar subcarpetas que contienen package.json o pom.xml
       - name: Encontrar subcarpetas de ejercicios
-        id: find_exercises
         run: |
-          # Buscar las subcarpetas de ejercicios que contienen package.json o pom.xml
-          EXERCISE_FOLDERS=$(find ./* -maxdepth 1 -type d \
+          # Buscar las subcarpetas que contienen package.json o pom.xml
+          EXERCISE_FOLDERS=$(find ./ -maxdepth 1 -type d \
             \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) \
             -exec basename {} \;)
-          
+
+          # Mostrar las subcarpetas encontradas
           echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
+
           # Establecer la salida para usarla en pasos posteriores
           echo "folders=$EXERCISE_FOLDERS" >> $GITHUB_ENV
 
       # Validar cada subcarpeta de ejercicios con las verificaciones adicionales
       - name: Validar cada ejercicio
         run: |
+          # Iterar sobre las carpetas encontradas
           for FOLDER in ${{ env.folders }}; do
             echo "Validando carpeta $FOLDER"
             
