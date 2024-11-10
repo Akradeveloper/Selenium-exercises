@@ -2,10 +2,9 @@ name: Validar Ejercicio Completo
 
 on:
   pull_request:
-    # Este evento se dispara para cualquier PR en cualquier rama
-    types: [opened, edited, synchronize,reopened]  # Para que se ejecute cuando el PR se abra, edite o sincronice
+    types: [opened, edited, synchronize, reopened]  # Para que se ejecute cuando el PR se abra, edite o sincronice
 
-  workflow_dispatch:
+  workflow_dispatch:  # Para ejecución manual
 
 jobs:
   validate:
@@ -20,27 +19,29 @@ jobs:
           token: ${{ secrets.TOKEN_GITHUB }}
           ref: ${{ github.head_ref }} # La rama del PR
 
-
       # Paso para verificar la estructura de los directorios en el repositorio
       - name: Verificar la estructura de directorios
         run: |
           echo "Estructura de directorios:"
-          ls -R ./
+          ls -R ./  # Muestra todos los archivos y directorios
 
       # Paso para encontrar subcarpetas que contienen package.json o pom.xml
-
       - name: Encontrar subcarpetas de ejercicios
+        id: find_exercises
         run: |
-
-           EXERCISE_FOLDERS=$(find ./* -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -exec basename {} \;)
-              echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
-              echo "::set-output name=folders::$EXERCISE_FOLDERS"
-
+          # Buscar las subcarpetas de ejercicios que contienen package.json o pom.xml
+          EXERCISE_FOLDERS=$(find ./Selenium-exercises/* -maxdepth 1 -type d \
+            \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) \
+            -exec basename {} \;)
+          
+          echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
+          # Establecer la salida para usarla en pasos posteriores
+          echo "folders=$EXERCISE_FOLDERS" >> $GITHUB_ENV
 
       # Validar cada subcarpeta de ejercicios con las verificaciones adicionales
       - name: Validar cada ejercicio
         run: |
-          for FOLDER in ${{ steps.find_exercises.outputs.folders }}; do
+          for FOLDER in ${{ env.folders }}; do
             echo "Validando carpeta $FOLDER"
             
             # Verificar si la carpeta 'src/pages' existe
