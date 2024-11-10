@@ -2,9 +2,7 @@ name: Validar Ejercicio Completo
 
 on:
   pull_request:
-    # Este evento se dispara para cualquier PR en cualquier rama
-    types: [opened, edited, synchronize, reopened] # Para que se ejecute cuando el PR se abra, edite o sincronice
-
+    types: [opened, edited, synchronize, reopened]
   workflow_dispatch:
 
 jobs:
@@ -29,33 +27,33 @@ jobs:
       # Encontrar subcarpetas que contienen package.json o pom.xml
       - name: Encontrar subcarpetas de ejercicios
         run: |
-          # Buscar las subcarpetas que contienen package.json o pom.xml
-          EXERCISE_FOLDERS=$(find ./ -maxdepth 1 -type d \
-            \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) \
-            -exec basename {} \;)
+          # Inicializar variable de carpetas válidas
+          VALID_FOLDERS=""
 
-          # Mostrar las subcarpetas encontradas
-          echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
+          # Buscar las subcarpetas que contienen package.json o pom.xml
+          for folder in $(find ./ -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -exec basename {} \;); do
+            # Comprobar si la subcarpeta tiene un directorio 'src'
+            if [ -d "$folder/src" ]; then
+              # Si existe 'src', se agrega la carpeta a la lista de carpetas válidas
+              VALID_FOLDERS="$VALID_FOLDERS$folder "
+            else
+              echo "No se encontró el directorio 'src' en $folder. Se omite esta carpeta."
+            fi
+          done
+
+          # Mostrar las subcarpetas válidas encontradas
+          echo "Subcarpetas válidas encontradas: $VALID_FOLDERS"
 
           # Establecer la salida para usarla en pasos posteriores
-          echo "folders=$EXERCISE_FOLDERS" >> $GITHUB_ENV
+          echo "folders=$VALID_FOLDERS" >> $GITHUB_ENV
 
-      # Validar cada subcarpeta de ejercicios con las verificaciones adicionales
+      # Validar cada ejercicio
       - name: Validar cada ejercicio
         run: |
-          # Iterar sobre las carpetas encontradas
+          # Iterar sobre las carpetas válidas encontradas
           for FOLDER in ${{ env.folders }}; do
             echo "Validando carpeta $FOLDER"
             
-            # Comprobar si la subcarpeta tiene un directorio 'src'
-            if [ ! -d "$FOLDER/src" ]; then
-              echo "No se encontró el directorio 'src' en $FOLDER. Se omite esta carpeta."
-              continue  # Si no existe src, se omite esta carpeta y se pasa a la siguiente
-            fi
-            
-            # Si existe 'src', realizar las validaciones
-            echo "Directorio 'src' encontrado en $FOLDER. Realizando comprobaciones adicionales..."
-
             # Verificar si la carpeta 'src/pages' existe
             if [ ! -d "$FOLDER/src/pages" ]; then
               echo "ERROR: Falta el directorio src/pages en $FOLDER"
