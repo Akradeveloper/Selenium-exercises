@@ -2,7 +2,8 @@ name: Validar Ejercicio
 
 on:
   pull_request:
-  workflow_dispatch:  # Para poder ejecutarlo manualmente
+    # Este evento se dispara para cualquier PR en cualquier rama
+    types: [opened, edited, synchronize]  # Para que se ejecute cuando el PR se abra, edite o sincronice
 
 jobs:
   validate:
@@ -17,15 +18,15 @@ jobs:
           token: ${{ secrets.TOKEN_GITHUB }}
           submodules: recursive  # Asegúrate de que los submódulos también se descarguen
 
-      # Paso para verificar el mensaje del PR
-      - name: Verificar mensaje del PR
+      # Paso para verificar el título del PR
+      - name: Verificar título del PR
         run: |
-          PR_BODY="${{ github.event.pull_request.body }}"
-          if [[ "$PR_BODY" != *"VERIFY"* ]]; then
-            echo "ERROR: El mensaje del PR no contiene la palabra 'VERIFY'."
-            exit 1  # Termina el flujo de trabajo si no se encuentra 'VERIFY' en el mensaje del PR
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ "$PR_TITLE" != *"VERIFY"* ]]; then
+            echo "ERROR: El título del PR no contiene la palabra 'VERIFY'."
+            exit 1  # Termina el flujo de trabajo si no se encuentra 'VERIFY' en el título del PR
           else
-            echo "Mensaje del PR contiene 'VERIFY'. Procediendo con la validación."
+            echo "Título del PR contiene 'VERIFY'. Procediendo con la validación."
           fi
 
       # Paso para verificar contenido de 'Selenium-exercises'
