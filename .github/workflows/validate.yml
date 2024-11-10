@@ -33,19 +33,19 @@ jobs:
       - name: Verificar contenido de 'Selenium-exercises'
         run: |
           # Verifica si la carpeta 'Selenium-exercises' existe y muestra su contenido
-          ls -R ./Selenium-exercises
+          ls -R ./
 
       # Encontrar las subcarpetas de ejercicios
       - name: Encontrar subcarpetas de ejercicios
         id: find_exercises
         run: |
           # Verificar si la carpeta Selenium-exercises existe
-          if [ ! -d "./Selenium-exercises" ]; then
+          if [ ! -d "./" ]; then
             echo "ERROR: No se encuentra la carpeta Selenium-exercises"
             exit 1
           fi
           # Buscar las subcarpetas que contienen package.json o pom.xml
-          EXERCISE_FOLDERS=$(find ./Selenium-exercises/* -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -print)
+          EXERCISE_FOLDERS=$(find ./* -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -print)
           echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
           echo "::set-output name=folders::$EXERCISE_FOLDERS"
 
