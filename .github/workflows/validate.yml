@@ -20,14 +20,18 @@ jobs:
           token: ${{ secrets.TOKEN_GITHUB }} # Usa el token secreto
           ref: ${{ github.head_ref }} # La rama del PR
 
-      # Paso 2: Encontrar subcarpetas de ejercicios con proyectos Java o JavaScript
+      # Encontrar las subcarpetas de ejercicios
       - name: Encontrar subcarpetas de ejercicios
         id: find_exercises
         run: |
-          # Busca todas las subcarpetas dentro de 'Selenium-exercises' que contienen package.json o pom.xml
-          EXERCISE_FOLDERS=$(find Selenium-exercises/* -type d -exec test -e "{}/package.json" -o -e "{}/pom.xml" \; -print)
-          echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
-          echo "::set-output name=folders::$EXERCISE_FOLDERS"
+   
+      # Buscar las subcarpetas de ejercicios que contienen package.json o pom.xml
+          EXERCISE_FOLDERS=$(find ./* -maxdepth 1 -type d \
+      \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) \
+      -exec basename {} \;)
+
+    echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
+    echo "::set-output name=folders::$EXERCISE_FOLDERS"
 
       # Paso 3: Validar cada subcarpeta de ejercicios
       - name: Validar cada ejercicio
