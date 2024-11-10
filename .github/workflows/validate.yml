@@ -36,7 +36,7 @@ jobs:
           find . -maxdepth 1 -type d  # Lista todas las carpetas en el nivel 1
 
           # Buscar las subcarpetas que contienen package.json o pom.xml
-          for folder in $(find . -type d); do
+          for folder in $(find ./ -maxdepth 1 -type d); do
             # Imprimir nombre de cada carpeta encontrada
             echo "Comprobando carpeta: $folder"
 
