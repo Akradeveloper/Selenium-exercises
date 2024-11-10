@@ -20,6 +20,7 @@ jobs:
           token: ${{ secrets.TOKEN_GITHUB }}
           ref: ${{ github.head_ref }} # La rama del PR
 
+
       # Paso para verificar la estructura de los directorios en el repositorio
       - name: Verificar la estructura de directorios
         run: |
@@ -27,13 +28,14 @@ jobs:
           ls -R ./
 
       # Paso para encontrar subcarpetas que contienen package.json o pom.xml
+
       - name: Encontrar subcarpetas de ejercicios
-        id: find_exercises
         run: |
-          # Busca todas las subcarpetas dentro de 'Selenium-exercises' que contengan package.json o pom.xml
-          EXERCISE_FOLDERS=$(find ./* -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -print)
-          echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
-          echo "::set-output name=folders::$EXERCISE_FOLDERS"
+
+           EXERCISE_FOLDERS=$(find ./* -maxdepth 1 -type d \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) -exec basename {} \;)
+              echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
+              echo "::set-output name=folders::$EXERCISE_FOLDERS"
+
 
       # Validar cada subcarpeta de ejercicios con las verificaciones adicionales
       - name: Validar cada ejercicio
