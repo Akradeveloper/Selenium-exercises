@@ -30,7 +30,7 @@ jobs:
         id: find_exercises
         run: |
           # Buscar las subcarpetas de ejercicios que contienen package.json o pom.xml
-          EXERCISE_FOLDERS=$(find ./* -maxdepth 1 -type d \
+          EXERCISE_FOLDERS=$(find ./Selenium-exercises/* -maxdepth 1 -type d \
             \( -exec test -e "{}/package.json" \; -o -exec test -e "{}/pom.xml" \; \) \
             -exec basename {} \;)
           
