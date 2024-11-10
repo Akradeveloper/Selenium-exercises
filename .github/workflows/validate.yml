@@ -30,19 +30,25 @@ jobs:
           # Inicializar variable de carpetas válidas
           VALID_FOLDERS=""
 
+          # Imprimir la lista de carpetas en el directorio actual
+          echo "Listando todas las carpetas en el directorio actual:"
+          find . -maxdepth 1 -type d  # Lista todas las carpetas en el nivel 1
+
           # Buscar las subcarpetas que contienen package.json o pom.xml
-          for folder in $(find ./ -type d); do
-            # Comprobar si el folder contiene package.json o pom.xml
+          for folder in $(find . -maxdepth 1 -type d); do
+            # Imprimir nombre de cada carpeta encontrada
+            echo "Comprobando carpeta: $folder"
+
+            # Comprobar si la subcarpeta contiene package.json o pom.xml
             if [ -e "$folder/package.json" ] || [ -e "$folder/pom.xml" ]; then
-              # Extraer solo el nombre de la carpeta
-              folder_name=$(basename "$folder")
+              echo "Encontrado archivo package.json o pom.xml en $folder"
 
               # Comprobar si la subcarpeta tiene un directorio 'src'
               if [ -d "$folder/src" ]; then
                 # Si existe 'src', se agrega la carpeta a la lista de carpetas válidas
-                VALID_FOLDERS="$VALID_FOLDERS$folder_name "
+                VALID_FOLDERS="$VALID_FOLDERS$(basename $folder) "
               else
-                echo "No se encontró el directorio 'src' en $folder_name. Se omite esta carpeta."
+                echo "No se encontró el directorio 'src' en $folder. Se omite esta carpeta."
               fi
             fi
           done
