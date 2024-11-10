@@ -25,9 +25,10 @@ jobs:
         id: find_exercises
         run: |
           # Busca todas las subcarpetas dentro de 'Selenium-exercises' que contienen package.json o pom.xml
-          EXERCISE_FOLDERS=$(find Selenium-exercises/* -type d -exec test -e "{}/package.json" -o -e "{}/pom.xml" \; -print)
+          EXERCISE_FOLDERS=$(find ./Selenium-exercises/* -type d -exec test -e "{}/package.json" -o -e "{}/pom.xml" \; -print)
           echo "Subcarpetas encontradas: $EXERCISE_FOLDERS"
           echo "::set-output name=folders::$EXERCISE_FOLDERS"
+
 
       # Paso 3: Validar cada subcarpeta de ejercicios
       - name: Validar cada ejercicio
