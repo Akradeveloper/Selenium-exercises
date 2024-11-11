@@ -1,0 +1,11 @@
+{
+  "name": "ejercicio-1-abrir-pagina",
+  "version": "1.0.0",
+  "description": "## Descripción",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
