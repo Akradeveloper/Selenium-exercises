@@ -23,9 +23,9 @@ jobs:
           PR_DESCRIPTION="${{ github.event.pull_request.body }}"
 
           # Detect language
-          if echo "$PR_DESCRIPTION" | grep -q '\- \[x\] Java'; then
+          if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
             echo "language=java" >> $GITHUB_ENV
-          elif echo "$PR_DESCRIPTION" | grep -q '\- \[x\] JavaScript'; then
+          elif echo "$PR_DESCRIPTION" | grep -q '\- \[X\] JavaScript'; then
             echo "language=javascript" >> $GITHUB_ENV
           else
             echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
@@ -35,7 +35,7 @@ jobs:
           # Detect exercises
           EXERCISES=""
           for i in {1..3}; do
-            if echo "$PR_DESCRIPTION" | grep -q "\- \[x\] Ejercicio $i"; then
+            if echo "$PR_DESCRIPTION" | grep -q "\- \[X\] Ejercicio $i"; then
               EXERCISES="$EXERCISES $i"
             fi
           done
