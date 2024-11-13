@@ -1,4 +1,4 @@
-name: Validar Ejercicio
+name: Validar Ejercicio Completo
 
 on:
   pull_request:
@@ -8,77 +8,77 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-
     steps:
       - name: Chequear el código
         uses: actions/checkout@v2
         with:
+          repository: Akradeveloper/Selenium-exercises
           token: ${{ secrets.TOKEN_GITHUB }}
           ref: ${{ github.head_ref }}
 
-      - name: Leer el contenido del PR para seleccionar ejercicio y lenguaje
-        id: pr_content
+      # Parse PR description to find marked exercises and language
+      - name: Analizar descripción del PR
+        id: parse_pr_description
         run: |
-          PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
-            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | jq -r '.body')
-          echo "$PR_BODY" > pr_body.txt
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
 
-          # Determinar el ejercicio y el lenguaje
-          EXERCISE=0
-          LANGUAGE=""
-
-          if grep -q "\- \[x\] Ejercicio 1" pr_body.txt; then
-            EXERCISE=1
+          # Detect language
+          if echo "$PR_DESCRIPTION" | grep -q '\- \[x\] Java'; then
+            echo "language=java" >> $GITHUB_ENV
+          elif echo "$PR_DESCRIPTION" | grep -q '\- \[x\] JavaScript'; then
+            echo "language=javascript" >> $GITHUB_ENV
+          else
+            echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
+            exit 1
           fi
 
-          if grep -q "\- \[x\] Java\b" pr_body.txt; then
-            LANGUAGE="Java"
-          elif grep -q "\- \[x\] JavaScript\b" pr_body.txt; then
-            LANGUAGE="JavaScript"
+          # Detect exercises
+          EXERCISES=""
+          for i in {1..3}; do
+            if echo "$PR_DESCRIPTION" | grep -q "\- \[x\] Ejercicio $i"; then
+              EXERCISES="$EXERCISES $i"
+            fi
+          done
+          if [ -z "$EXERCISES" ]; then
+            echo "ERROR: No se marcaron ejercicios para validar."
+            exit 1
           fi
+          echo "marked_exercises=$EXERCISES" >> $GITHUB_ENV
 
-          echo "EXERCISE=$EXERCISE" >> $GITHUB_ENV
-          echo "LANGUAGE=$LANGUAGE" >> $GITHUB_ENV
-
-      - name: Validar Ejercicio 1 en Java
-        if: env.EXERCISE == '1' && env.LANGUAGE == 'Java'
+      # Validate based on marked exercises and language
+      - name: Validar ejercicios seleccionados
         run: |
-          echo "Validando ejercicio 1 en Java"
-          if [ ! -d "ejercicio-1/src/pages" ]; then
-            echo "ERROR: Falta el directorio src/pages en ejercicio-1"
-            exit 1
-          fi
-          if [ ! -d "ejercicio-1/src/tests" ]; then
-            echo "ERROR: Falta el directorio src/tests en ejercicio-1"
-            exit 1
-          fi
-          if [ ! -f "ejercicio-1/pom.xml" ]; then
-            echo "ERROR: Falta pom.xml en ejercicio-1"
-            exit 1
-          elif ! grep -q "selenium-java" "ejercicio-1/pom.xml"; then
-            echo "ERROR: Selenium no está listado como dependencia en pom.xml"
-            exit 1
-          fi
-          mvn checkstyle:check -f "ejercicio-1/pom.xml" || exit 1
-
-      - name: Validar Ejercicio 1 en JavaScript
-        if: env.EXERCISE == '1' && env.LANGUAGE == 'JavaScript'
-        run: |
-          echo "Validando ejercicio 1 en JavaScript"
-          if [ ! -d "ejercicio-1/src/pages" ]; then
-            echo "ERROR: Falta el directorio src/pages en ejercicio-1"
-            exit 1
-          fi
-          if [ ! -d "ejercicio-1/src/tests" ]; then
-            echo "ERROR: Falta el directorio src/tests en ejercicio-1"
-            exit 1
-          fi
-          if [ ! -f "ejercicio-1/package.json" ]; then
-            echo "ERROR: Falta package.json en ejercicio-1"
-            exit 1
-          elif ! grep -q "selenium-webdriver" "ejercicio-1/package.json"; then
-            echo "ERROR: selenium-webdriver no está listado como dependencia en package.json"
-            exit 1
-          fi
-          npm install --prefix "ejercicio-1"
-          npx eslint "ejercicio-1/src/" || exit 1
+          for EXERCISE in ${{ env.marked_exercises }}; do
+            FOLDER="./ejercicio-$EXERCISE"
+            
+            echo "Validando $FOLDER..."
+            
+            # Java validation for Ejercicio 1
+            if [[ $EXERCISE == "1" && "${{ env.language }}" == "java" ]]; then
+              if [ ! -f "$FOLDER/pom.xml" ]; then
+                echo "ERROR: Falta el archivo pom.xml en $FOLDER"
+                exit 1
+              fi
+              if ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
+                echo "ERROR: Falta la dependencia de selenium-java en $FOLDER/pom.xml"
+                exit 1
+              fi
+              mvn -f "$FOLDER/pom.xml" checkstyle:check || exit 1
+            fi
+            
+            # JavaScript validation for Ejercicio 1
+            if [[ $EXERCISE == "1" && "${{ env.language }}" == "javascript" ]]; then
+              if [ ! -f "$FOLDER/package.json" ]; then
+                echo "ERROR: Falta el archivo package.json en $FOLDER"
+                exit 1
+              fi
+              if ! grep -q "selenium-webdriver" "$FOLDER/package.json"; then
+                echo "ERROR: Falta la dependencia de selenium-webdriver en $FOLDER/package.json"
+                exit 1
+              fi
+              npm install --prefix "$FOLDER"
+              npx eslint "$FOLDER/src/" || exit 1
+            fi
+            
+            # Additional validations can be added for other exercises here
+          done
