@@ -142,9 +142,9 @@ jobs:
                         ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró referencia a https://www.saucedemo.com en LoginPage.js (JavaScript)"
                          ERROR_FLAG=1
                      fi
-                     if ! grep -E 'cy\.get\(["\'][#\.](user-name|password|login-button)["\']\)' "$FOLDER/src/pages/LoginPage.js"; then
-                       ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontraron selectores de usuario, contraseña o botón de login en LoginPage.js (JavaScript)"
-                       ERROR_FLAG=1
+                     if ! grep -E 'document\.querySelector\(["\'][#\.](user-name|password|login-button)["\']\)' "$FOLDER/src/pages/LoginPage.js"; then
+                        ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontraron selectores de usuario, contraseña o botón de login en LoginPage.js (JavaScript)"
+                        ERROR_FLAG=1
                     fi
                  fi
             fi
