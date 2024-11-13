@@ -2,63 +2,60 @@ name: Validar Ejercicio Completo
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened] # Ejecutarse en PRs abiertos, editados, sincronizados o reabiertos
-  workflow_dispatch: # Para ejecutar manualmente el flujo
+    types: [opened, edited, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-
     steps:
-      # Paso para obtener el código del repositorio
       - name: Chequear el código
         uses: actions/checkout@v2
         with:
           repository: Akradeveloper/Selenium-exercises
           token: ${{ secrets.TOKEN_GITHUB }}
-          ref: ${{ github.head_ref }} # Usar la rama del PR
+          ref: ${{ github.head_ref }}
 
-      # Paso para verificar la estructura de los directorios en el repositorio
-      - name: Verificar la estructura de directorios
+      # Parse PR description to find marked exercises and language
+      - name: Analizar descripción del PR
+        id: parse_pr_description
         run: |
-          echo "Estructura de directorios:"
-          ls -R ./
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
 
-      # Paso para encontrar subcarpetas que contienen 'src'
-      - name: Encontrar subcarpetas con 'src'
-        run: |
-          # Inicializar variable de carpetas válidas
-          VALID_FOLDERS=""
-
-          # Buscar las subcarpetas que contienen un directorio 'src'
-          for folder in $(find . -maxdepth 1 -type d); do
-            echo "Comprobando carpeta: $folder"
-            
-            # Comprobar si la carpeta tiene un directorio 'src'
-            if [ -d "$folder/src" ]; then
-              echo "Directorio 'src' encontrado en $folder"
-              VALID_FOLDERS="$VALID_FOLDERS$(basename $folder) "
-            fi
-          done
-
-          # Mostrar las subcarpetas válidas encontradas
-          echo "Subcarpetas válidas encontradas: $VALID_FOLDERS"
-
-          # Establecer la salida para usarla en pasos posteriores
-          if [ -n "$VALID_FOLDERS" ]; then
-            echo "folders=$VALID_FOLDERS" >> $GITHUB_ENV
+          # Detect language
+          if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
+            echo "language=java" >> $GITHUB_ENV
+          elif echo "$PR_DESCRIPTION" | grep -q '\- \[X\] JavaScript'; then
+            echo "language=javascript" >> $GITHUB_ENV
           else
-            echo "No se encontraron carpetas válidas con 'src'."
+            echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
+            exit 1
           fi
 
-      # Paso para validar cada ejercicio
-      - name: Validar cada ejercicio
-        run: |
-          for FOLDER in ${{ env.folders }}; do
-            echo "Validando carpeta $FOLDER"
+          # Detect exercises
+          EXERCISES=""
+          for i in {1..3}; do
+            if echo "$PR_DESCRIPTION" | grep -q "\- \[X\] Ejercicio $i"; then
+              EXERCISES="$EXERCISES $i"
+            fi
+          done
+          if [ -z "$EXERCISES" ]; then
+            echo "ERROR: No se marcaron ejercicios para validar."
+            exit 1
+          fi
+          echo "marked_exercises=$EXERCISES" >> $GITHUB_ENV
 
-            # Verificar si la carpeta 'src/pages' existe
-            if [ ! -d "$FOLDER/src/pages" ]; then
+      # Validate based on marked exercises and language
+      - name: Validar ejercicios seleccionados
+        run: |
+          for EXERCISE in ${{ env.marked_exercises }}; do
+            FOLDER="./ejercicio-$EXERCISE"
+            
+            echo "Validando $FOLDER... con ${{ env.language }}"
+            
+            # Java validation for Ejercicio 1
+            if [[ $EXERCISE == "1" && "${{ env.language }}" == "java" ]]; then
+               if [ ! -d "$FOLDER/src/pages" ]; then
               echo "ERROR: Falta el directorio src/pages en $FOLDER"
               ERROR_FLAG=1
             fi
@@ -94,31 +91,28 @@ jobs:
             if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
               echo "WARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
             fi
-
-            # Validación de dependencias de Selenium en pom.xml (para proyectos Java)
-            if [[ $EXERCISE == "1" && "${{ env.language }}" == "java" ]]; then
-              if [ ! -f "$FOLDER/pom.xml" ]; then
+            if [ ! -f "$FOLDER/pom.xml" ]; then
                 echo "ERROR: Falta el archivo pom.xml en $FOLDER"
                 ERROR_FLAG=1
-              fi
-              if ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
+            fi
+            if ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
                 echo "ERROR: Falta la dependencia de selenium-java en $FOLDER/pom.xml"
                 ERROR_FLAG=1
-              fi
+            fi
               # Verificar si 'pages' y 'tests' existen
-              if [ ! -d "$FOLDER/src/pages" ]; then
+            if [ ! -d "$FOLDER/src/pages" ]; then
                 echo "ERROR: Falta el directorio src/pages en $FOLDER"
                 ERROR_FLAG=1
-              fi
-              if [ ! -d "$FOLDER/src/tests" ]; then
+            fi
+            if [ ! -d "$FOLDER/src/tests" ]; then
                 echo "ERROR: Falta el directorio src/tests en $FOLDER"
                 ERROR_FLAG=1
-              fi
+            fi
               # Ejecutar Checkstyle si pom.xml existe
               mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG=1
-            fi
 
-            # Validación de dependencias de Selenium en package.json (para proyectos JavaScript)
+            
+            # JavaScript validation for Ejercicio 1
             if [[ $EXERCISE == "1" && "${{ env.language }}" == "javascript" ]]; then
               if [ ! -f "$FOLDER/package.json" ]; then
                 echo "ERROR: Falta el archivo package.json en $FOLDER"
@@ -140,10 +134,9 @@ jobs:
               # Ejecutar ESLint si package.json existe
               npm install --prefix "$FOLDER"
               npx eslint "$FOLDER/src/" || ERROR_FLAG=1
-            fi
+            fi      
+            # Additional validations can be added for other exercises here
           done
-
-          # Si se encontró un error, terminar con exit 1
-          if [ $ERROR_FLAG -eq 1 ]; then
+            if [ $ERROR_FLAG -eq 1 ]; then
             exit 1
-          fi
+            fi
