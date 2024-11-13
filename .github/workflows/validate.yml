@@ -126,24 +126,25 @@ jobs:
             EXERCISE=$1
             FOLDER=$2
             # Specific validation checks for JavaScript
-            npm install --prefix "$FOLDER"
-            npx eslint "$FOLDER/src/" || ERROR_FLAG=1
+            
             # Add additional JavaScript-specific checks here...
             if [ "$EXERCISE" == "1" ]; then
-                 if ! grep -r "title().should('include', 'Swag Labs')" "$FOLDER/src/tests/"; then
-                   ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginPage (JavaScript)"
-                   ERROR_FLAG=1
-                 fi
-                 if [ ! -f "$FOLDER/src/pages/LoginPage.js" ]; then
-                     ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.js en el directorio Pages (JavaScript)"
-                     ERROR_FLAG=1
-                 else
-                     if ! grep -q 'https://www.saucedemo.com' "$FOLDER/src/pages/LoginPage.js"; then
+                if ! grep -r "title().should('include', 'Swag Labs')" "$FOLDER/src/tests/"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginPage (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+                if [ ! -f "$FOLDER/src/pages/LoginPage.js" ]; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.js en el directorio Pages (JavaScript)"
+                    ERROR_FLAG=1
+                else
+                    if ! grep -q 'https://www.saucedemo.com' "$FOLDER/src/pages/LoginPage.js"; then
                         ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró referencia a https://www.saucedemo.com en LoginPage.js (JavaScript)"
                         ERROR_FLAG=1
-                     fi
-                 fi
+                    fi
+                fi
             fi
+            npm install --prefix "$FOLDER" || ERROR_FLAG=1
+            npx eslint "$FOLDER/src/" || ERROR_FLAG=1
           }
 
           # Iterate through marked exercises
