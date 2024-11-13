@@ -48,8 +48,10 @@ jobs:
 
       # Validate based on marked exercises and language
       - name: Validar ejercicios seleccionados
+        id: validate_exercises
         run: |
           ERROR_FLAG=0  # Initialize the flag at the start
+          ERROR_MESSAGES=""  # Store all error messages to post them later
           for EXERCISE in ${{ env.marked_exercises }}; do
             FOLDER="./ejercicio-$EXERCISE"
             
@@ -61,55 +63,55 @@ jobs:
               ERROR_FLAG_EXERCISE=0
 
               if [ ! -d "$FOLDER/src/pages" ]; then
-                echo "ERROR: Falta el directorio src/pages en $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
               fi
 
               if [ ! -d "$FOLDER/src/tests" ]; then
-                echo "ERROR: Falta el directorio src/tests en $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
               fi
 
               if [ ! -f "$FOLDER/.gitignore" ]; then
-                echo "ERROR: Falta el archivo .gitignore en $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo .gitignore en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
               fi
 
               if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
-                echo "ERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
               fi
 
               if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
-                echo "ERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
               fi
 
               if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
-                echo "WARNING: No se encontraron comentarios de clase en el código de $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios de clase en el código de $FOLDER"
               fi
 
               if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
-                echo "WARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
               fi
 
               if [ ! -f "$FOLDER/pom.xml" ]; then
-                  echo "ERROR: Falta el archivo pom.xml en $FOLDER"
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo pom.xml en $FOLDER"
                   ERROR_FLAG_EXERCISE=1
               fi
 
               if ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
-                  echo "ERROR: Falta la dependencia de selenium-java en $FOLDER/pom.xml"
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta la dependencia de selenium-java en $FOLDER/pom.xml"
                   ERROR_FLAG_EXERCISE=1
               fi
 
               if [ ! -d "$FOLDER/src/pages" ]; then
-                  echo "ERROR: Falta el directorio src/pages en $FOLDER"
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
                   ERROR_FLAG_EXERCISE=1
               fi
 
               if [ ! -d "$FOLDER/src/tests" ]; then
-                  echo "ERROR: Falta el directorio src/tests en $FOLDER"
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
                   ERROR_FLAG_EXERCISE=1
               fi
 
@@ -127,22 +129,22 @@ jobs:
               ERROR_FLAG_EXERCISE=0
 
               if [ ! -f "$FOLDER/package.json" ]; then
-                echo "ERROR: Falta el archivo package.json en $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo package.json en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
               fi
 
               if ! grep -q "selenium-webdriver" "$FOLDER/package.json"; then
-                echo "ERROR: Falta la dependencia selenium-webdriver en $FOLDER/package.json"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta la dependencia selenium-webdriver en $FOLDER/package.json"
                 ERROR_FLAG_EXERCISE=1
               fi
 
               if [ ! -d "$FOLDER/src/pages" ]; then
-                echo "ERROR: Falta el directorio src/pages en $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
               fi
 
               if [ ! -d "$FOLDER/src/tests" ]; then
-                echo "ERROR: Falta el directorio src/tests en $FOLDER"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
               fi
 
@@ -156,7 +158,21 @@ jobs:
             fi      
           done
 
-          # Exit with an error if any validation fails
+          # Post error messages to PR if any validation fails
           if [ $ERROR_FLAG -eq 1 ]; then
+            echo -e "Errores encontrados durante la validación:\n$ERROR_MESSAGES"
+            curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
+              -d "{\"body\": \"Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
             exit 1
           fi
+
+      # Close the PR if there are validation errors
+      - name: Cerrar PR si hay errores
+        if: failure()
+        uses: peter-evans/close-pull@v3
+        with:
+          pull-request-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.TOKEN_GITHUB }}
+          comment: Auto-closing pull request
+          delete-branch: false
