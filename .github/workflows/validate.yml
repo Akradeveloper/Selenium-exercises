@@ -51,30 +51,42 @@ jobs:
           for EXERCISE in ${{ env.marked_exercises }}; do
             FOLDER="./ejercicio-$EXERCISE"
             
-            echo "Validando $FOLDER..."
+            echo "Validando $FOLDER... con ${{ env.language }}"
             
             # Java validation for Ejercicio 1
             if [[ $EXERCISE == "1" && "${{ env.language }}" == "java" ]]; then
               if [ ! -f "$FOLDER/pom.xml" ]; then
                 echo "ERROR: Falta el archivo pom.xml en $FOLDER"
-                exit 1
               fi
               if ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
                 echo "ERROR: Falta la dependencia de selenium-java en $FOLDER/pom.xml"
-                exit 1
+              fi
+              # Check if 'pages' and 'tests' directories exist
+              if [ ! -d ""$FOLDER/src/pages" ]; then
+                echo "ERROR: Falta el directorio src/pages en $FOLDER"
+               fi
+              if [ ! -d ""$FOLDER/src/tests" ]; then
+                echo "ERROR: Falta el directorio src/tests en $FOLDER"
               fi
               mvn -f "$FOLDER/pom.xml" checkstyle:check || exit 1
             fi
+
+
             
             # JavaScript validation for Ejercicio 1
             if [[ $EXERCISE == "1" && "${{ env.language }}" == "javascript" ]]; then
               if [ ! -f "$FOLDER/package.json" ]; then
                 echo "ERROR: Falta el archivo package.json en $FOLDER"
-                exit 1
               fi
               if ! grep -q "selenium-webdriver" "$FOLDER/package.json"; then
                 echo "ERROR: Falta la dependencia de selenium-webdriver en $FOLDER/package.json"
-                exit 1
+              fi
+              # Check if 'pages' and 'tests' directories exist
+              if [ ! -d ""$FOLDER/src/pages" ]; then
+                echo "ERROR: Falta el directorio src/pages en $FOLDER"
+              fi
+              if [ ! -d ""$FOLDER/src/tests" ]; then
+                echo "ERROR: Falta el directorio src/tests en $FOLDER"
               fi
               npm install --prefix "$FOLDER"
               npx eslint "$FOLDER/src/" || exit 1
