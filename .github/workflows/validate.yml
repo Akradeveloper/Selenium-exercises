@@ -59,7 +59,6 @@ jobs:
             
             # Java validation for Ejercicio 1
             if [[ $EXERCISE == "1" && "${{ env.language }}" == "java" ]]; then
-              # Initialize error flag for this specific exercise
               ERROR_FLAG_EXERCISE=0
 
               if [ ! -d "$FOLDER/src/pages" ]; then
@@ -106,7 +105,6 @@ jobs:
               fi
               mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG_EXERCISE=1
 
-              # Update the overall error flag if any exercise-specific error is found
               if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
                 ERROR_FLAG=1
               fi
@@ -114,7 +112,6 @@ jobs:
             
             # JavaScript validation for Ejercicio 1
             if [[ $EXERCISE == "1" && "${{ env.language }}" == "javascript" ]]; then
-              # Initialize error flag for this specific exercise
               ERROR_FLAG_EXERCISE=0
 
               if [ ! -f "$FOLDER/package.json" ]; then
@@ -140,14 +137,249 @@ jobs:
               npm install --prefix "$FOLDER"
               npx eslint "$FOLDER/src/" || ERROR_FLAG_EXERCISE=1
 
-              # Update the overall error flag if any exercise-specific error is found
               if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
                 ERROR_FLAG=1
               fi
-            fi      
+            fi
+
+            # Validation for Ejercicio 2
+            if [[ $EXERCISE == "2" && "${{ env.language }}" == "java" ]]; then
+              ERROR_FLAG_EXERCISE=0
+
+              # Verificar que los directorios src/pages y src/tests existan
+              if [ ! -d "$FOLDER/src/pages" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -d "$FOLDER/src/tests" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Verificar la existencia del archivo .gitignore
+              if [ ! -f "$FOLDER/.gitignore" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo .gitignore en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Verificar la presencia de archivos de solución
+              if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Verificar la existencia del test
+              if [ ! -f "$FOLDER/src/tests/form-test.java" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo de test src/tests/form-test.java"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Validación adicional: revisar la lógica para enviar el formulario (dependiendo de la implementación)
+              if ! grep -q "form.submit()" "$FOLDER/src/tests/form-test.java"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la lógica para enviar el formulario en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Si se encontraron errores, actualizar el estado
+              if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
+                ERROR_FLAG=1
+              fi
+            fi
+
+            # JavaScript validation for Ejercicio 2
+            if [[ $EXERCISE == "2" && "${{ env.language }}" == "javascript" ]]; then
+              ERROR_FLAG_EXERCISE=0
+
+              if [ ! -f "$FOLDER/package.json" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo package.json en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if ! grep -q "selenium-webdriver" "$FOLDER/package.json"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta la dependencia selenium-webdriver en $FOLDER/package.json"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -d "$FOLDER/src/pages" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -d "$FOLDER/src/tests" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Verificar que el archivo de test exista y esté bien configurado
+              if [ ! -f "$FOLDER/src/tests/form-test.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo de test src/tests/form-test.js"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if ! grep -q "form.submit()" "$FOLDER/src/tests/form-test.js"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la lógica para enviar el formulario en el test"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              npm install --prefix "$FOLDER"
+              npx eslint "$FOLDER/src/" || ERROR_FLAG_EXERCISE=1
+
+              if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
+                ERROR_FLAG=1
+              fi
+            fi
+
+            # Validation for Ejercicio 3
+            if [[ $EXERCISE == "3" && "${{ env.language }}" == "java" ]]; then
+              ERROR_FLAG_EXERCISE=0
+
+              # Verificar que los directorios src/pages y src/tests existan
+              if [ ! -d "$FOLDER/src/pages" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -d "$FOLDER/src/tests" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Verificar la existencia del archivo .gitignore
+              if [ ! -f "$FOLDER/.gitignore" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo .gitignore en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Verificar la presencia de archivos de solución
+              if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Verificar la existencia del test
+              if [ ! -f "$FOLDER/src/tests/form-test.java" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo de test src/tests/form-test.java"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Validación adicional: revisar la lógica para enviar el formulario (dependiendo de la implementación)
+              if ! grep -q "form.submit()" "$FOLDER/src/tests/form-test.java"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la lógica para enviar el formulario en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+              if [[ $EXERCISE == "3" && "${{ env.language }}" == "java" ]]; then
+            ERROR_FLAG_EXERCISE=0
+
+            # Assert 1: Comprobar que el enlace es clickeable
+            LINK_TEXT="Ir a la siguiente página"
+            if [ ! $(driver.findElements(By.linkText("$LINK_TEXT"))) ]; then
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: El enlace '$LINK_TEXT' no está disponible para hacer clic en Ejercicio 3"
+              ERROR_FLAG_EXERCISE=1
+            fi
+
+            # Hacer clic en el enlace
+            driver.findElement(By.linkText("$LINK_TEXT")).click();
+
+            # Assert 2: Verificar que la URL cambió correctamente
+            CURRENT_URL=$(driver.getCurrentUrl())
+            if [[ ! "$CURRENT_URL" =~ "pagina-destino" ]]; then
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: La URL no cambió correctamente, URL actual: $CURRENT_URL"
+              ERROR_FLAG_EXERCISE=1
+            fi
+
+            # Assert 3: Verificar que el elemento específico está visible en la página destino
+            if [ ! $(driver.findElements(By.id("titulo-pagina-destino"))) ]; then
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: El elemento 'titulo-pagina-destino' no está visible en la página de destino"
+              ERROR_FLAG_EXERCISE=1
+            fi
+
+            # Actualizar el indicador de errores si hay problemas
+            if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
+              ERROR_FLAG=1
+            fi
+          fi
+              # Si se encontraron errores, actualizar el estado
+              if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
+                ERROR_FLAG=1
+              fi
+            fi
+
+            # JavaScript validation for Ejercicio 3
+            if [[ $EXERCISE == "3" && "${{ env.language }}" == "javascript" ]]; then
+              ERROR_FLAG_EXERCISE=0
+
+              if [ ! -f "$FOLDER/package.json" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo package.json en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if ! grep -q "selenium-webdriver" "$FOLDER/package.json"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta la dependencia selenium-webdriver en $FOLDER/package.json"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -d "$FOLDER/src/pages" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -d "$FOLDER/src/tests" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              # Verificar que el archivo de test exista y esté bien configurado
+              if [ ! -f "$FOLDER/src/tests/form-test.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el archivo de test src/tests/form-test.js"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if ! grep -q "form.submit()" "$FOLDER/src/tests/form-test.js"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la lógica para enviar el formulario en el test"
+                ERROR_FLAG_EXERCISE=1
+              fi
+               // Assert 1: Comprobar que el enlace es clickeable
+            const link = await driver.findElement(By.linkText('Ir a la siguiente página'));
+            if (!link) {
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: El enlace 'Ir a la siguiente página' no está disponible para hacer clic en Ejercicio 3";
+              ERROR_FLAG_EXERCISE = 1;
+            }
+
+            // Hacer clic en el enlace
+            await link.click();
+
+            // Assert 2: Verificar que la URL cambió correctamente
+            const currentUrl = await driver.getCurrentUrl();
+            if (!currentUrl.includes("pagina-destino")) {
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: La URL no cambió correctamente, URL actual: ${currentUrl}";
+              ERROR_FLAG_EXERCISE = 1;
+            }
+
+            // Assert 3: Verificar que el elemento específico está visible en la página destino
+            const element = await driver.findElement(By.id('titulo-pagina-destino'));
+            if (!(await element.isDisplayed())) {
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: El elemento 'titulo-pagina-destino' no está visible en la página de destino";
+              ERROR_FLAG_EXERCISE = 1;
+            }
+
+            // Actualizar el indicador de errores si hay problemas
+            if (ERROR_FLAG_EXERCISE === 1) {
+              ERROR_FLAG = 1;
+            }
+          fi
+
+              npm install --prefix "$FOLDER"
+              npx eslint "$FOLDER/src/" || ERROR_FLAG_EXERCISE=1
+
+              if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
+                ERROR_FLAG=1
+              fi
+            fi
+
+
           done
 
-          # Post error messages to PR if any validation fails
           if [ $ERROR_FLAG -eq 1 ]; then
             echo -e "Errores encontrados durante la validación:\n$ERROR_MESSAGES"
             curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
