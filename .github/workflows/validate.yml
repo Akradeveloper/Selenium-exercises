@@ -23,13 +23,16 @@ jobs:
         run: |
           PR_DESCRIPTION="${{ github.event.pull_request.body }}"
 
-          # Detect language
-          if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
+          # Detectar lenguaje de programación
+          JAVA_COUNT=$(echo "$PR_DESCRIPTION" | grep -c '\- \[X\] Java')
+          JS_COUNT=$(echo "$PR_DESCRIPTION" | grep -c '\- \[X\] JavaScript')
+
+          if [ "$JAVA_COUNT" -eq 1 ] && [ "$JS_COUNT" -eq 0 ]; then
             echo "language=java" >> $GITHUB_ENV
-          elif echo "$PR_DESCRIPTION" | grep -q '\- \[X\] JavaScript'; then
+          elif [ "$JS_COUNT" -eq 1 ] && [ "$JAVA_COUNT" -eq 0 ]; then
             echo "language=javascript" >> $GITHUB_ENV
           else
-            echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
+            echo "ERROR: Debes marcar solo un lenguaje de programación (Java o JavaScript)."
             exit 1
           fi
 
