@@ -13,4 +13,4 @@ Marque con una 'X' el ejercicio que desea validar:
 Marque con una 'X' el lenguaje del ejercicio:
 
 - [] Java
-- [] JavaScript
+- [] JS
