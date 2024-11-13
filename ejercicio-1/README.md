@@ -7,8 +7,8 @@ En este ejercicio, deberás automatizar la apertura de una página web y verific
 ## Tareas a Realizar
 
 1. Abre el navegador utilizando **Selenium WebDriver**.
-2. Navega a la página web [https://www.example.com](https://www.example.com).
-3. Verifica que el título de la página contenga el texto "Example Domain".
+2. Navega a la página web [https://www.saucedemo.com/](https://www.saucedemo.com/).
+3. Verifica que el título de la página contenga el texto "Swag Labs".
 4. Cierra el navegador.
 
 ## Requisitos

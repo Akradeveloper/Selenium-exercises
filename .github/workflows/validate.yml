@@ -99,6 +99,10 @@ jobs:
             FOLDER=$2
             # Specific validation checks for Java
             if [ "$EXERCISE" == "1" ]; then
+            if [!grep -r "assert.*getTitle.*\"Swag Labs\"" "$FOLDER/src/test/java/" ||] {
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginPage (Java)"
+                  ERROR_FLAG=1
+            fi
               mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG=1
             fi
             # Add additional Java-specific checks here...
@@ -111,6 +115,9 @@ jobs:
             npm install --prefix "$FOLDER"
             npx eslint "$FOLDER/src/" || ERROR_FLAG=1
             # Add additional JavaScript-specific checks here...
+            if [!grep -r "cy.title().should('include', 'Swag Labs')" "$FOLDER/cypress/integration/" ||] {
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginPage (JavaScript)"
+                  ERROR_FLAG=1
           }
 
           # Iterate through marked exercises
