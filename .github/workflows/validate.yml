@@ -8,6 +8,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+
     steps:
       - name: Chequear el código
         uses: actions/checkout@v2
@@ -48,6 +49,7 @@ jobs:
       # Validate based on marked exercises and language
       - name: Validar ejercicios seleccionados
         run: |
+          ERROR_FLAG=0  # Initialize the flag at the start
           for EXERCISE in ${{ env.marked_exercises }}; do
             FOLDER="./ejercicio-$EXERCISE"
             
@@ -55,88 +57,106 @@ jobs:
             
             # Java validation for Ejercicio 1
             if [[ $EXERCISE == "1" && "${{ env.language }}" == "java" ]]; then
-               if [ ! -d "$FOLDER/src/pages" ]; then
-              echo "ERROR: Falta el directorio src/pages en $FOLDER"
-              ERROR_FLAG=1
-            fi
+              # Initialize error flag for this specific exercise
+              ERROR_FLAG_EXERCISE=0
 
-            # Verificar si la carpeta 'src/tests' existe
-            if [ ! -d "$FOLDER/src/tests" ]; then
-              echo "ERROR: Falta el directorio src/tests en $FOLDER"
-              ERROR_FLAG=1
-            fi
-
-            # Verificar si el archivo .gitignore existe
-            if [ ! -f "$FOLDER/.gitignore" ]; then
-              echo "ERROR: Falta el archivo .gitignore en $FOLDER"
-              ERROR_FLAG=1
-            fi
-
-            # Verificar que no haya archivos de solución
-            if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
-              echo "ERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
-              ERROR_FLAG=1
-            fi
-
-            # Verificar que no haya archivos de test de ejemplo
-            if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
-              echo "ERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
-              ERROR_FLAG=1
-            fi
-
-            # Comprobaciones de comentarios en el código
-            if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
-              echo "WARNING: No se encontraron comentarios de clase en el código de $FOLDER"
-            fi
-            if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
-              echo "WARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
-            fi
-            if [ ! -f "$FOLDER/pom.xml" ]; then
-                echo "ERROR: Falta el archivo pom.xml en $FOLDER"
-                ERROR_FLAG=1
-            fi
-            if ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
-                echo "ERROR: Falta la dependencia de selenium-java en $FOLDER/pom.xml"
-                ERROR_FLAG=1
-            fi
-              # Verificar si 'pages' y 'tests' existen
-            if [ ! -d "$FOLDER/src/pages" ]; then
+              if [ ! -d "$FOLDER/src/pages" ]; then
                 echo "ERROR: Falta el directorio src/pages en $FOLDER"
-                ERROR_FLAG=1
-            fi
-            if [ ! -d "$FOLDER/src/tests" ]; then
-                echo "ERROR: Falta el directorio src/tests en $FOLDER"
-                ERROR_FLAG=1
-            fi
-              # Ejecutar Checkstyle si pom.xml existe
-              mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG=1
+                ERROR_FLAG_EXERCISE=1
+              fi
 
+              if [ ! -d "$FOLDER/src/tests" ]; then
+                echo "ERROR: Falta el directorio src/tests en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -f "$FOLDER/.gitignore" ]; then
+                echo "ERROR: Falta el archivo .gitignore en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
+                echo "ERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
+                echo "ERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
+                echo "WARNING: No se encontraron comentarios de clase en el código de $FOLDER"
+              fi
+
+              if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
+                echo "WARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
+              fi
+
+              if [ ! -f "$FOLDER/pom.xml" ]; then
+                  echo "ERROR: Falta el archivo pom.xml en $FOLDER"
+                  ERROR_FLAG_EXERCISE=1
+              fi
+
+              if ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
+                  echo "ERROR: Falta la dependencia de selenium-java en $FOLDER/pom.xml"
+                  ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -d "$FOLDER/src/pages" ]; then
+                  echo "ERROR: Falta el directorio src/pages en $FOLDER"
+                  ERROR_FLAG_EXERCISE=1
+              fi
+
+              if [ ! -d "$FOLDER/src/tests" ]; then
+                  echo "ERROR: Falta el directorio src/tests en $FOLDER"
+                  ERROR_FLAG_EXERCISE=1
+              fi
+
+              mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG_EXERCISE=1
+
+              # Update the overall error flag if any exercise-specific error is found
+              if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
+                ERROR_FLAG=1
+              fi
+            fi
             
             # JavaScript validation for Ejercicio 1
             if [[ $EXERCISE == "1" && "${{ env.language }}" == "javascript" ]]; then
+              # Initialize error flag for this specific exercise
+              ERROR_FLAG_EXERCISE=0
+
               if [ ! -f "$FOLDER/package.json" ]; then
                 echo "ERROR: Falta el archivo package.json en $FOLDER"
-                ERROR_FLAG=1
+                ERROR_FLAG_EXERCISE=1
               fi
+
               if ! grep -q "selenium-webdriver" "$FOLDER/package.json"; then
                 echo "ERROR: Falta la dependencia selenium-webdriver en $FOLDER/package.json"
-                ERROR_FLAG=1
+                ERROR_FLAG_EXERCISE=1
               fi
-              # Verificar si 'pages' y 'tests' existen
+
               if [ ! -d "$FOLDER/src/pages" ]; then
                 echo "ERROR: Falta el directorio src/pages en $FOLDER"
-                ERROR_FLAG=1
+                ERROR_FLAG_EXERCISE=1
               fi
+
               if [ ! -d "$FOLDER/src/tests" ]; then
                 echo "ERROR: Falta el directorio src/tests en $FOLDER"
+                ERROR_FLAG_EXERCISE=1
+              fi
+
+              npm install --prefix "$FOLDER"
+              npx eslint "$FOLDER/src/" || ERROR_FLAG_EXERCISE=1
+
+              # Update the overall error flag if any exercise-specific error is found
+              if [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
                 ERROR_FLAG=1
               fi
-              # Ejecutar ESLint si package.json existe
-              npm install --prefix "$FOLDER"
-              npx eslint "$FOLDER/src/" || ERROR_FLAG=1
             fi      
-            # Additional validations can be added for other exercises here
           done
-            if [ $ERROR_FLAG -eq 1 ]; then
+
+          # Exit with an error if any validation fails
+          if [ $ERROR_FLAG -eq 1 ]; then
             exit 1
-            fi
+          fi
