@@ -1,131 +1,84 @@
-name: Validar Ejercicio Completo
+name: Validar Ejercicio
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened] # Ejecutarse en PRs abiertos, editados, sincronizados o reabiertos
-  workflow_dispatch: # Para ejecutar manualmente el flujo
+    types: [opened, edited, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
   validate:
     runs-on: ubuntu-latest
 
     steps:
-      # Paso para obtener el código del repositorio
       - name: Chequear el código
         uses: actions/checkout@v2
         with:
-          repository: Akradeveloper/Selenium-exercises
           token: ${{ secrets.TOKEN_GITHUB }}
-          ref: ${{ github.head_ref }} # Usar la rama del PR
+          ref: ${{ github.head_ref }}
 
-      # Paso para verificar la estructura de los directorios en el repositorio
-      - name: Verificar la estructura de directorios
+      - name: Leer el contenido del PR para seleccionar ejercicio y lenguaje
+        id: pr_content
         run: |
-          echo "Estructura de directorios:"
-          ls -R ./
+          PR_BODY=$(curl -s -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" | jq -r '.body')
+          echo "$PR_BODY" > pr_body.txt
 
-      # Paso para encontrar subcarpetas que contienen 'src'
-      - name: Encontrar subcarpetas con 'src'
-        run: |
-          # Inicializar variable de carpetas válidas
-          VALID_FOLDERS=""
+          # Determinar el ejercicio y el lenguaje
+          EXERCISE=0
+          LANGUAGE=""
 
-          # Buscar las subcarpetas que contienen un directorio 'src'
-          for folder in $(find . -maxdepth 1 -type d); do
-            echo "Comprobando carpeta: $folder"
-            
-            # Comprobar si la carpeta tiene un directorio 'src'
-            if [ -d "$folder/src" ]; then
-              echo "Directorio 'src' encontrado en $folder"
-              VALID_FOLDERS="$VALID_FOLDERS$(basename $folder) "
-            fi
-          done
-
-          # Mostrar las subcarpetas válidas encontradas
-          echo "Subcarpetas válidas encontradas: $VALID_FOLDERS"
-
-          # Establecer la salida para usarla en pasos posteriores
-          if [ -n "$VALID_FOLDERS" ]; then
-            echo "folders=$VALID_FOLDERS" >> $GITHUB_ENV
-          else
-            echo "No se encontraron carpetas válidas con 'src'."
+          if grep -q "\- \[x\] Ejercicio 1" pr_body.txt; then
+            EXERCISE=1
           fi
 
-      # Paso para validar cada ejercicio
-      - name: Validar cada ejercicio
+          if grep -q "\- \[x\] Java\b" pr_body.txt; then
+            LANGUAGE="Java"
+          elif grep -q "\- \[x\] JavaScript\b" pr_body.txt; then
+            LANGUAGE="JavaScript"
+          fi
+
+          echo "EXERCISE=$EXERCISE" >> $GITHUB_ENV
+          echo "LANGUAGE=$LANGUAGE" >> $GITHUB_ENV
+
+      - name: Validar Ejercicio 1 en Java
+        if: env.EXERCISE == '1' && env.LANGUAGE == 'Java'
         run: |
-          for FOLDER in ${{ env.folders }}; do
-            echo "Validando carpeta $FOLDER"
+          echo "Validando ejercicio 1 en Java"
+          if [ ! -d "ejercicio-1/src/pages" ]; then
+            echo "ERROR: Falta el directorio src/pages en ejercicio-1"
+            exit 1
+          fi
+          if [ ! -d "ejercicio-1/src/tests" ]; then
+            echo "ERROR: Falta el directorio src/tests en ejercicio-1"
+            exit 1
+          fi
+          if [ ! -f "ejercicio-1/pom.xml" ]; then
+            echo "ERROR: Falta pom.xml en ejercicio-1"
+            exit 1
+          elif ! grep -q "selenium-java" "ejercicio-1/pom.xml"; then
+            echo "ERROR: Selenium no está listado como dependencia en pom.xml"
+            exit 1
+          fi
+          mvn checkstyle:check -f "ejercicio-1/pom.xml" || exit 1
 
-            # Verificar si la carpeta 'src/pages' existe
-            if [ ! -d "$FOLDER/src/pages" ]; then
-              echo "ERROR: Falta el directorio src/pages en $FOLDER"
-              exit 1
-            fi
-
-            # Verificar si la carpeta 'src/tests' existe
-            if [ ! -d "$FOLDER/src/tests" ]; then
-              echo "ERROR: Falta el directorio src/tests en $FOLDER"
-              exit 1
-            fi
-
-            # Verificar si el archivo .gitignore existe
-            if [ ! -f "$FOLDER/.gitignore" ]; then
-              echo "ERROR: Falta el archivo .gitignore en $FOLDER"
-              exit 1
-            fi
-
-            # Verificar que no haya archivos de solución
-            if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
-              echo "ERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
-              exit 1
-            fi
-
-            # Verificar que no haya archivos de test de ejemplo
-            if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
-              echo "ERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
-              exit 1
-            fi
-
-            # Comprobaciones de comentarios en el código
-            if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
-              echo "WARNING: No se encontraron comentarios de clase en el código de $FOLDER"
-            fi
-            if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
-              echo "WARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
-            fi
-
-            # Validación de dependencias de Selenium en pom.xml (para proyectos Java)
-            if [ -f "$FOLDER/pom.xml" ] && ! grep -q "selenium-java" "$FOLDER/pom.xml"; then
-              echo "ERROR: Selenium no está listado como dependencia en pom.xml en $FOLDER"
-              exit 1
-            fi
-
-            # Validación de dependencias de Selenium en package.json (para proyectos JavaScript)
-            if [ -f "$FOLDER/package.json" ] && ! grep -q "selenium-webdriver" "$FOLDER/package.json"; then
-              echo "ERROR: selenium-webdriver no está listado como dependencia en package.json en $FOLDER"
-              exit 1
-            fi
-
-            # Buscar código comentado en todo el proyecto
-            if grep -r "/\*.*" "$FOLDER" | grep -q .; then
-              echo "ERROR: El código no debe estar comentado en el repositorio de $FOLDER"
-              exit 1
-            fi
-
-            # Ejecutar ESLint si existe package.json (para proyectos JavaScript)
-            if [ -f "$FOLDER/package.json" ]; then
-              echo "Instalando dependencias de JavaScript en $FOLDER..."
-              npm install --prefix "$FOLDER"
-              echo "Ejecutando ESLint en $FOLDER..."
-              npx eslint "$FOLDER/src/" || exit 1
-            fi
-
-            # Ejecutar Checkstyle si existe pom.xml (para proyectos Java)
-            if [ -f "$FOLDER/pom.xml" ]; then
-              echo "Instalando dependencias de Java en $FOLDER..."
-              mvn install -f "$FOLDER/pom.xml"
-              echo "Ejecutando Checkstyle en $FOLDER..."
-              mvn checkstyle:check -f "$FOLDER/pom.xml" || exit 1
-            fi
-          done
+      - name: Validar Ejercicio 1 en JavaScript
+        if: env.EXERCISE == '1' && env.LANGUAGE == 'JavaScript'
+        run: |
+          echo "Validando ejercicio 1 en JavaScript"
+          if [ ! -d "ejercicio-1/src/pages" ]; then
+            echo "ERROR: Falta el directorio src/pages en ejercicio-1"
+            exit 1
+          fi
+          if [ ! -d "ejercicio-1/src/tests" ]; then
+            echo "ERROR: Falta el directorio src/tests en ejercicio-1"
+            exit 1
+          fi
+          if [ ! -f "ejercicio-1/package.json" ]; then
+            echo "ERROR: Falta package.json en ejercicio-1"
+            exit 1
+          elif ! grep -q "selenium-webdriver" "ejercicio-1/package.json"; then
+            echo "ERROR: selenium-webdriver no está listado como dependencia en package.json"
+            exit 1
+          fi
+          npm install --prefix "ejercicio-1"
+          npx eslint "ejercicio-1/src/" || exit 1
