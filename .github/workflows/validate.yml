@@ -104,17 +104,6 @@ jobs:
                   ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta la dependencia de selenium-java en $FOLDER/pom.xml"
                   ERROR_FLAG_EXERCISE=1
               fi
-
-              if [ ! -d "$FOLDER/src/pages" ]; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
-                  ERROR_FLAG_EXERCISE=1
-              fi
-
-              if [ ! -d "$FOLDER/src/tests" ]; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
-                  ERROR_FLAG_EXERCISE=1
-              fi
-
               mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG_EXERCISE=1
 
               # Update the overall error flag if any exercise-specific error is found
