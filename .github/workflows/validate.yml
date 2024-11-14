@@ -120,26 +120,32 @@ jobs:
             fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "2" ]; then
+              # TODO: Add validations for exercise 2
+              :
             fi
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "3" ]; then
+              # TODO: Add validations for exercise 3
+              :
             fi
 
             # Add additional Java-specific checks here...
-            if [ "$EXERCISE" == "4" ]; then           
+            if [ "$EXERCISE" == "4" ]; then
+              # TODO: Add validations for exercise 4
+              :           
             fi
 
             # Add additional Java-specific checks here...
-            if [ "$EXERCISE" == "5" ]; then         
+            if [ "$EXERCISE" == "5" ]; then  
+              # TODO: Add validations for exercise 5
+              :       
             fi
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "6" ]; then   
-            fi
-
-            # Add additional Java-specific checks here...
-            if [ "$EXERCISE" == "7" ]; then  
+              # TODO: Add validations for exercise 6
+              :
             fi
             
             # Add additional Java-specific checks here...
