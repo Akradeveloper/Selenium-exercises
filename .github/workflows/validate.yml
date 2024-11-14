@@ -120,32 +120,26 @@ jobs:
             fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "2" ]; then
-            
             fi
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "3" ]; then
-            
             fi
 
             # Add additional Java-specific checks here...
-            if [ "$EXERCISE" == "4" ]; then
-            
+            if [ "$EXERCISE" == "4" ]; then           
             fi
 
             # Add additional Java-specific checks here...
-            if [ "$EXERCISE" == "5" ]; then
-            
+            if [ "$EXERCISE" == "5" ]; then         
             fi
 
             # Add additional Java-specific checks here...
-            if [ "$EXERCISE" == "6" ]; then
-            
+            if [ "$EXERCISE" == "6" ]; then   
             fi
 
             # Add additional Java-specific checks here...
-            if [ "$EXERCISE" == "7" ]; then
-            
+            if [ "$EXERCISE" == "7" ]; then  
             fi
             
             # Add additional Java-specific checks here...
