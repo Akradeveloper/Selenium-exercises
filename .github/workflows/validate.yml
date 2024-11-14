@@ -74,18 +74,17 @@ jobs:
             if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
                 ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
-              fi
-              if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
+            fi
+            if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
                 ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
                 ERROR_FLAG_EXERCISE=1
-              fi
-              if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
+            fi
+            if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
                 ERROR_MESSAGES="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios de clase en el código de $FOLDER"
-              fi
-              if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
+            fi
+            if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
                 ERROR_MESSAGES="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
-              fi
-
+            fi
             # Language-specific validation
             if [ "$LANGUAGE" == "java" ]; then
               java_validation $EXERCISE $FOLDER
@@ -105,19 +104,19 @@ jobs:
                   ERROR_FLAG=1
                 fi
                 if [ ! -f "$FOLDER/src/pages/LoginPage.java" ]; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.java en el directorio Pages (Java)"
-                ERROR_FLAG=1
-              else
-                # Check for specific selectors related to saucedemo.com
-                if ! grep -q 'https://www.saucedemo.com' "$FOLDER/src/pages/LoginPage.java"; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró referencia a https://www.saucedemo.com en LoginPage.java (Java)"
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.java en el directorio Pages (Java)"
                   ERROR_FLAG=1
+                else
+                  # Check for specific selectors related to saucedemo.com
+                  if ! grep -q 'https://www.saucedemo.com' "$FOLDER/src/pages/LoginPage.java"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró referencia a https://www.saucedemo.com en LoginPage.java (Java)"
+                    ERROR_FLAG=1
+                  fi
+                  if ! grep -E 'By\..*username|By\..*password|By\..*login-button' "$FOLDER/src/pages/LoginPage.java"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontraron selectores de usuario, contraseña o botón de login en LoginPage.java (Java)"
+                    ERROR_FLAG=1
+                    fi
                 fi
-                if ! grep -E 'By\..*username|By\..*password|By\..*login-button' "$FOLDER/src/pages/LoginPage.java"; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontraron selectores de usuario, contraseña o botón de login en LoginPage.java (Java)"
-                  ERROR_FLAG=1
-                fi
-              fi
             fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "2" ]; then
