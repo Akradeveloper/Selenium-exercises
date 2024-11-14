@@ -99,10 +99,6 @@ jobs:
             mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG=1
             # Specific validation checks for Java
             if [ "$EXERCISE" == "1" ]; then
-                if ! grep -r "assert.*getTitle.*\"Swag Labs\"" "$FOLDER/src/test/java/"; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginPage (Java)"
-                  ERROR_FLAG=1
-                fi
                 if [ ! -f "$FOLDER/src/pages/LoginPage.java" ]; then
                   ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.java en el directorio Pages (Java)"
                   ERROR_FLAG=1
@@ -115,8 +111,21 @@ jobs:
                   if ! grep -E 'By\..*username|By\..*password|By\..*login-button' "$FOLDER/src/pages/LoginPage.java"; then
                     ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontraron selectores de usuario, contraseña o botón de login en LoginPage.java (Java)"
                     ERROR_FLAG=1
-                    fi
+                  fi
                 fi
+                if [ ! -f "$FOLDER/src/pages/LoginTest.java" ]; then
+                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginTest.java en el directorio Test (Java)"
+                      ERROR_FLAG=1
+                else      
+                  if ! grep -r "assert.*getTitle.*\"Swag Labs\"" "$FOLDER/src/test/java/LoginTest.java"; then
+                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginTest.java en el directorio Test (Java)"
+                      ERROR_FLAG=1
+                  fi
+                  if ! grep -r "await driver.getTitle().contains.*'Swag Labs'" "$FOLDER/src/test/java/LoginTest.java"; then
+                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginTest (Java)"
+                      ERROR_FLAG=1
+                  fi
+                fi 
             fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "2" ]; then
