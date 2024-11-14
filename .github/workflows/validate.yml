@@ -97,16 +97,14 @@ jobs:
           java_validation() {
             EXERCISE=$1
             FOLDER=$2
+            mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG=1
             # Specific validation checks for Java
             if [ "$EXERCISE" == "1" ]; then
                 if ! grep -r "assert.*getTitle.*\"Swag Labs\"" "$FOLDER/src/test/java/"; then
                   ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginPage (Java)"
                   ERROR_FLAG=1
                 fi
-              mvn -f "$FOLDER/pom.xml" checkstyle:check || ERROR_FLAG=1
-            fi
-            # Add additional Java-specific checks here...
-            if [ ! -f "$FOLDER/src/pages/LoginPage.java" ]; then
+                if [ ! -f "$FOLDER/src/pages/LoginPage.java" ]; then
                 ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.java en el directorio Pages (Java)"
                 ERROR_FLAG=1
               else
@@ -120,6 +118,38 @@ jobs:
                   ERROR_FLAG=1
                 fi
               fi
+            fi
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "2" ]; then
+            
+            fi
+
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "3" ]; then
+            
+            fi
+
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "4" ]; then
+            
+            fi
+
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "5" ]; then
+            
+            fi
+
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "6" ]; then
+            
+            fi
+
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "7" ]; then
+            
+            fi
+            
+            # Add additional Java-specific checks here...
           }
 
           javascript_validation() {
