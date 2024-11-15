@@ -6,8 +6,8 @@ En este ejercicio, deberás automatizar la navegación entre diferentes páginas
 
 ## Tareas a Realizar
 
-1. Abre el navegador y navega a una página web.
-2. Haz clic en un enlace que redirija a otra página dentro del mismo sitio web.
+1. Abre el navegador y navega a una página web.[https://www.telerik.com/](https://www.telerik.com/).
+2. Haz clic en un enlace que redirija a otra página dentro del mismo sitio web.[https://www.telerik.com/support/demos/](https://www.telerik.com/support/demos)
 3. Verifica que la página de destino se haya cargado correctamente comprobando, por ejemplo, el título de la página.
 
 ## Requisitos
