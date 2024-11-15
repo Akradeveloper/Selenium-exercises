@@ -43,6 +43,11 @@ jobs:
             exit 1
           fi
           echo "marked_exercises=$EXERCISES" >> $GITHUB_ENV
+          - name: Verificar contenido del repositorio
+          run: ls -R
+
+      - name: Listar archivos en scripts
+        run: ls -R scripts || echo "La carpeta 'scripts' no existe."
 
       - name: Make scripts executable
         run: |
