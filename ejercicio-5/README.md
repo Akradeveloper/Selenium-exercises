@@ -1,25 +1,25 @@
-# Ejercicio 5: Usar Page Object Model (POM)
+# **Ejercicio 5: Interactuar con Tablas Dinámicas**
 
-## Descripción
+## **Descripción**
 
-En este ejercicio aprenderás a implementar el patrón **Page Object Model** (POM). Este patrón es útil para estructurar las pruebas de manera más organizada, separando la lógica de interacción con la página y los tests.
+En este ejercicio aprenderás a interactuar con tablas dinámicas en una página web. Estas tablas permiten la manipulación dinámica de datos, como ordenar, filtrar y buscar. Aprenderás a identificar y automatizar la interacción con los elementos dentro de estas tablas utilizando Selenium.
 
-## Tareas a Realizar
+## **Tareas a Realizar**
 
-1. Implementa una clase que represente la página de inicio (por ejemplo, `LoginPage`).
-2. Crea métodos dentro de esa clase para interactuar con los elementos de la página (como ingresar un nombre de usuario, contraseña y hacer clic en el botón de inicio de sesión).
-3. Escribe otro test que use esta clase para interactuar con la página y verificar si el login fue exitoso.
+1. Abre una página que contenga una tabla dinámica, como [DataTables](https://datatables.net/).
+2. Interactúa con la tabla:
+   - Ordena las columnas.
+   - Filtra los datos según diferentes criterios.
+   - Verifica que los cambios en la tabla se reflejan correctamente.
 
-## Requisitos
-
-### Dependencias:
+## **Requisitos**
 
 - **Selenium WebDriver** para Java o JavaScript.
-- **ChromeDriver** (o cualquier otro WebDriver compatible).
+- **ChromeDriver** (u otro WebDriver compatible).
 
 ---
 
-### Enlaces útiles:
+## **Enlaces Útiles**
 
+- [DataTables Documentation](https://datatables.net/)
 - [Documentación de Selenium WebDriver](https://www.selenium.dev/documentation/)
-- [Patrón Page Object Model](https://martinfowler.com/bliki/PageObject.html)
