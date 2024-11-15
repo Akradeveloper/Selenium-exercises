@@ -223,8 +223,37 @@ jobs:
           fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "2" ]; then
-              # TODO: Add validations for exercise 2
-              :
+                # Validar existencia de FormPage.js
+                if [ ! -f "$FOLDER/src/pages/FormPage.js" ]; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormPage.js en el directorio src/pages (JavaScript)"
+                    ERROR_FLAG=1
+                else
+                  # Verificar referencias a elementos del formulario
+                  if ! grep -q 'document.querySelector.*"#firstName"' "$FOLDER/src/pages/FormPage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de nombre en FormPage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                  if ! grep -q 'document.querySelector.*"#userEmail"' "$FOLDER/src/pages/FormPage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de correo electrónico en FormPage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                  if ! grep -q 'document.querySelector.*"#submit"' "$FOLDER/src/pages/FormPage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el botón de envío en FormPage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                fi
+
+              # Validar existencia de FormTest.js
+              if [ ! -f "$FOLDER/src/tests/FormTest.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormTest.js en el directorio src/tests (JavaScript)"
+                ERROR_FLAG=1
+              else
+                # Verificar la validación del mensaje de éxito
+                if ! grep -q 'expect.*getText.*"Thank you"' "$FOLDER/src/tests/FormTest.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la validación del mensaje de éxito en FormTest.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+              fi
             fi
 
             # Add additional Java-specific checks here...
