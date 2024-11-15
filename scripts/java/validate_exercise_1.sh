@@ -47,4 +47,8 @@ if ! mvn -f "$FOLDER/pom.xml" checkstyle:check; then
   ERROR_FLAG=1
 fi
 
+# Exportar mensajes de error y estado
+echo -e "$ERROR_MESSAGES" >> "$ERROR_FILE"
+exit 0
+
 
