@@ -42,8 +42,3 @@ if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
   ERROR_MESSAGES="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios de métodos en el código de $FOLDER"
 fi
 
-# Output errors if any
-if [ $ERROR_FLAG -eq 1 ]; then
-  echo -e "Errores encontrados en el ejercicio $EXERCISE:\n$ERROR_MESSAGES"
-  exit 1
-fi

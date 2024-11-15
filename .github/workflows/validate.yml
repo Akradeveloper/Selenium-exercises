@@ -64,6 +64,10 @@ jobs:
           for EXERCISE in ${{ env.marked_exercises }}; do
           if [ "${{ env.language }}" == "java" ]; then
               echo "Validando ejercicio Java ${EXERCISE}"
+              if ! bash./scripts/validate_common.sh "$ERROR_FLAG" "$ERROR_MESSAGES" "$EXERCISE"; then
+                  ERROR_FLAG=1
+                  ERROR_MESSAGES="$ERROR_MESSAGES\n- Error en Java ejercicio ${EXERCISE}"
+              fi   
               if ! bash ./scripts/java/validate_exercise_${EXERCISE}.sh "$ERROR_FLAG" "$ERROR_MESSAGES"; then
                   ERROR_FLAG=1
                   ERROR_MESSAGES="$ERROR_MESSAGES\n- Error en Java ejercicio ${EXERCISE}"
