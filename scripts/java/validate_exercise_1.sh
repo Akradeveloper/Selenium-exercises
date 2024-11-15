@@ -43,5 +43,9 @@ fi
 # Output errors if any
 if [ $ERROR_FLAG -eq 1 ]; then
   echo -e "Errores encontrados en el ejercicio $EXERCISE:\n$ERROR_MESSAGES"
+  echo -e "Errores encontrados durante la validación:\n$ERROR_MESSAGES"
+            curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
+              -d "{\"body\": \"Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
   exit 1
 fi
