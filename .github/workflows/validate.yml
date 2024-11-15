@@ -321,8 +321,49 @@ jobs:
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "3" ]; then
-              # TODO: Add validations for exercise 3
-              :
+              # Validar HomePage.js
+              if [ ! -f "$FOLDER/src/pages/HomePage.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo HomePage.js en $FOLDER/src/pages (JavaScript)"
+                ERROR_FLAG=1
+              else
+                # Validar que contiene métodos clave
+                if ! grep -q "async navigateToHome()" "$FOLDER/src/pages/HomePage.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método navigateToHome en HomePage.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+                if ! grep -q "async clickDemoLink()" "$FOLDER/src/pages/HomePage.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método clickDemoLink en HomePage.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+              fi
+
+              # Validar DemoPage.js
+              if [ ! -f "$FOLDER/src/pages/DemoPage.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo DemoPage.js en $FOLDER/src/pages (JavaScript)"
+                ERROR_FLAG=1
+              else
+                # Validar que contiene método para verificar el título
+                if ! grep -q "async verifyTitle()" "$FOLDER/src/pages/DemoPage.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método verifyTitle en DemoPage.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+              fi
+
+              # Validar homeTest.js
+              if [ ! -f "$FOLDER/src/tests/homeTest.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo homeTest.js en $FOLDER/src/tests (JavaScript)"
+                ERROR_FLAG=1
+              else
+                # Validar que usa HomePage y DemoPage
+                if ! grep -q "const HomePage = require('../pages/HomePage')" "$FOLDER/src/tests/homeTest.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la importación de HomePage en homeTest.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+                if ! grep -q "const DemoPage = require('../pages/DemoPage')" "$FOLDER/src/tests/homeTest.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la importación de DemoPage en homeTest.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+              fi
             fi
 
             # Add additional Java-specific checks here...
