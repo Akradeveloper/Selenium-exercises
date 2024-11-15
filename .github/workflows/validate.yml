@@ -54,7 +54,7 @@ jobs:
         run: |
           chmod +x scripts/java/validate_exercise_*.sh
           chmod +x scripts/javascript/validate_exercise_*.sh
-
+          chmod +x scripts/validate_common.sh
       # Validate based on marked exercises and language
       - name: Validar ejercicios seleccionados
         id: validate_exercises
