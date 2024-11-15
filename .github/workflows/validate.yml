@@ -87,8 +87,30 @@ jobs:
             fi
             # Language-specific validation
             if [ "$LANGUAGE" == "java" ]; then
+              # Comprobar si el archivo pom.xml o build.gradle tiene dependencia de Selenium
+                if ! grep -q 'org.seleniumhq.selenium' "$FOLDER/pom.xml" && ! grep -q 'selenium-java' "$FOLDER/build.gradle"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta la dependencia de Selenium en el archivo pom.xml o build.gradle (Java)"
+                  ERROR_FLAG=1
+                fi
+
+                # Validar uso de System.setProperty y new ChromeDriver()
+                if ! grep -q 'System.setProperty("webdriver.chrome.driver"' "$FOLDER/src" || ! grep -q 'new ChromeDriver()' "$FOLDER/src"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró configuración correcta de ChromeDriver en el código Java"
+                  ERROR_FLAG=1
+                fi
               java_validation $EXERCISE $FOLDER
             elif [ "$LANGUAGE" == "javascript" ]; then
+              # Comprobar si package.json tiene la dependencia de selenium-webdriver
+              if [ ! -f "$FOLDER/package.json" ] || ! grep -q '"selenium-webdriver"' "$FOLDER/package.json"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta la dependencia de selenium-webdriver en package.json (JavaScript)"
+                ERROR_FLAG=1
+              fi
+
+              # Validar inicialización del ChromeDriver en código JS
+              if ! grep -q "require('selenium-webdriver/chrome')" "$FOLDER/src" || ! grep -q "new Builder().forBrowser('chrome')" "$FOLDER/src"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró configuración correcta de ChromeDriver en el código JavaScript"
+                ERROR_FLAG=1
+              fi
               javascript_validation $EXERCISE $FOLDER
             fi
           }
