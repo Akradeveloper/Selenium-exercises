@@ -46,8 +46,8 @@ jobs:
 
       - name: Make scripts executable
         run: |
-          chmod +x scripts\java\validate_exercise_*.sh
-          chmod +x scripts\javascript\validate_exercise_*.sh
+          chmod +x scripts\\java\\validate_exercise_*.sh
+          chmod +x scripts\\javascript\\validate_exercise_*.sh
 
       # Validate based on marked exercises and language
       - name: Validar ejercicios seleccionados
