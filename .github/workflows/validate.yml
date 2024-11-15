@@ -52,9 +52,9 @@ jobs:
           ERROR_MESSAGES=""
           for EXERCISE in ${{ env.marked_exercises }}; do
             if [ "${{ env.language }}" == "java" ]; then
-              bash scripts/validate_exercise_${EXERCISE}.sh
+              bash scripts/java/validate_exercise_${EXERCISE}.sh
             elif [ "${{ env.language }}" == "javascript" ]; then
-              bash scripts/validate_exercise_${EXERCISE}.sh
+              bash scripts/javascript/validate_exercise_${EXERCISE}.sh
             fi
           done
 
