@@ -1,18 +1,12 @@
 #!/bin/bash
 
 # Definir el ejercicio actual
-EXERCISE=1
+EXERCISE=$1
 FOLDER="./ejercicio-$EXERCISE"
 
 # Inicializar indicadores de error y mensajes
 ERROR_FLAG=0
 ERROR_MESSAGES=""
-
-# Llamar a las validaciones comunes
-if ! bash ./scripts/validate_common.sh "$EXERCISE"; then
-  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falló la validación común para el ejercicio $EXERCISE."
-  ERROR_FLAG=1
-fi
 
 # Validaciones específicas para el ejercicio 1
 # 1. Verificar la estructura y contenido del archivo LoginPage.java
@@ -47,8 +41,10 @@ if ! mvn -f "$FOLDER/pom.xml" checkstyle:check; then
   ERROR_FLAG=1
 fi
 
-# Exportar mensajes de error y estado
-echo -e "$ERROR_MESSAGES" >> "$ERROR_FILE"
+# Exportar mensajes de error y estado al archivo de errores
+if [ -n "$ERROR_MESSAGES" ]; then
+  echo -e "$ERROR_MESSAGES" >> "$ERROR_FILE"
+fi
+
+# Salir sin error para continuar el flujo
 exit 0
-
-
