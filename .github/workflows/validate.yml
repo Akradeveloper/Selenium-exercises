@@ -129,9 +129,38 @@ jobs:
             fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "2" ]; then
-              # TODO: Add validations for exercise 2
-              :
+              # Validar existencia de FormPage.java
+              if [ ! -f "$FOLDER/src/pages/FormPage.java" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormPage.java en el directorio src/pages (Java)"
+                ERROR_FLAG=1
+              else
+                # Verificar referencias a elementos del formulario
+                if ! grep -q 'By.*name.*"firstName"' "$FOLDER/src/pages/FormPage.java"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de nombre en FormPage.java (Java)"
+                  ERROR_FLAG=1
+                fi
+                if ! grep -q 'By.*email.*"userEmail"' "$FOLDER/src/pages/FormPage.java"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de correo electrónico en FormPage.java (Java)"
+                  ERROR_FLAG=1
+                fi
+                if ! grep -q 'By.*button.*"submit"' "$FOLDER/src/pages/FormPage.java"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el botón de envío en FormPage.java (Java)"
+                  ERROR_FLAG=1
+                fi
+              fi
+
+              # Validar existencia de FormTest.java
+            if [ ! -f "$FOLDER/src/tests/FormTest.java" ]; then
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormTest.java en el directorio src/tests (Java)"
+              ERROR_FLAG=1
+            else
+              # Verificar la validación del mensaje de éxito
+              if ! grep -q 'assert.*getText.*"Thank you"' "$FOLDER/src/tests/FormTest.java"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la validación del mensaje de éxito en FormTest.java (Java)"
+                ERROR_FLAG=1
+              fi
             fi
+          fi
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "3" ]; then
