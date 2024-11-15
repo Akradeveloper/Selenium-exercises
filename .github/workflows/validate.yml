@@ -233,8 +233,42 @@ jobs:
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "4" ]; then
-              # TODO: Add validations for exercise 4
-              :           
+              # Validar HomePage.java
+              if [ ! -f "$FOLDER/src/pages/HomePage.java" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo WaitExamplePage.java en $FOLDER/src/pages (Java)"
+                ERROR_FLAG=1
+              else
+                # Validar que contiene métodos clave
+                if ! grep -q 'driver.get("https://www.telerik.com/")' "$FOLDER/src/pages/HomePage.java"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método para navegar a https://www.telerik.com en HomePage.java (Java)"
+                  ERROR_FLAG=1
+                fi
+                if ! grep -q 'WebDriverWait' "$FOLDER/src/pages/HomePage.java"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el uso de WebDriverWait para esperas explícitas en HomePage.java (Java)"
+                  ERROR_FLAG=1
+                fi
+                if ! grep -q 'driver.findElement(By.*).click()' "$FOLDER/src/pages/HomePage.java"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método para hacer clic en un botón en HomePage.java (Java)"
+                  ERROR_FLAG=1
+                fi
+              fi
+
+              # Validar HomePage.java
+              if [ ! -f "$FOLDER/src/tests/HomePage.java" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo HomePage.java en $FOLDER/src/tests (Java)"
+                ERROR_FLAG=1
+              else
+                # Validar que usa WaitExamplePage
+                if ! grep -q 'WaitExamplePage waitPage = new WaitExamplePage' "$FOLDER/src/tests/HomePage.java"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el uso de WaitExamplePage en HomePage.java (Java)"
+                  ERROR_FLAG=1
+                fi
+                # Validar que contiene una aserción para confirmar la acción
+                if ! grep -q 'assert.*getTitle.*"Expected Title"' "$FOLDER/src/tests/HomePage.java"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró una aserción para verificar la acción en HomePage.java (Java)"
+                  ERROR_FLAG=1
+                fi
+              fi
             fi
 
             # Add additional Java-specific checks here...
@@ -368,9 +402,43 @@ jobs:
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "4" ]; then
-              # TODO: Add validations for exercise 4
-              :           
-            fi
+                # Validar WaitExamplePage.js
+                if [ ! -f "$FOLDER/src/pages/WaitExamplePage.js" ]; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo WaitExamplePage.js en $FOLDER/src/pages (JavaScript)"
+                    ERROR_FLAG=1
+                else
+                  # Validar que contiene métodos clave
+                  if ! grep -q "async navigateToHome()" "$FOLDER/src/pages/WaitExamplePage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método navigateToHome en WaitExamplePage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                  if ! grep -q "await page.waitForSelector" "$FOLDER/src/pages/WaitExamplePage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el uso de page.waitForSelector para esperas explícitas en WaitExamplePage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                  if ! grep -q "await page.click" "$FOLDER/src/pages/WaitExamplePage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método para hacer clic en un botón en WaitExamplePage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                fi
+
+                # Validar waitExampleTest.js
+                if [ ! -f "$FOLDER/src/tests/waitExampleTest.js" ]; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo waitExampleTest.js en $FOLDER/src/tests (JavaScript)"
+                  ERROR_FLAG=1
+                else
+                  # Validar que usa WaitExamplePage
+                    if ! grep -q "const WaitExamplePage = require('../pages/WaitExamplePage')" "$FOLDER/src/tests/waitExampleTest.js"; then
+                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la importación de WaitExamplePage en waitExampleTest.js (JavaScript)"
+                      ERROR_FLAG=1
+                    fi
+                    # Validar que contiene una aserción para confirmar la acción
+                    if ! grep -q "expect(page.title()).resolves.toContain('Expected Title')" "$FOLDER/src/tests/waitExampleTest.js"; then
+                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró una aserción para verificar la acción en waitExampleTest.js (JavaScript)"
+                      ERROR_FLAG=1
+                    fi
+                  fi
+                fi
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "5" ]; then  
