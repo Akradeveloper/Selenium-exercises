@@ -57,36 +57,53 @@ jobs:
           chmod +x scripts/validate_common.sh
       # Validate based on marked exercises and language
       - name: Validar ejercicios seleccionados
-        id: validate_exercises
         run: |
+          # Crear archivo temporal para errores
+          ERROR_FILE=$(mktemp)
           ERROR_FLAG=0
-          ERROR_MESSAGES=""
+
           for EXERCISE in ${{ env.marked_exercises }}; do
-          if [ "${{ env.language }}" == "java" ]; then
+            if [ "${{ env.language }}" == "java" ]; then
               echo "Validando ejercicio Java ${EXERCISE}"
-              if ! bash./scripts/validate_common.sh "$ERROR_FLAG" "$ERROR_MESSAGES" "$EXERCISE"; then
-                  ERROR_FLAG=1
-                  ERROR_MESSAGES="$ERROR_MESSAGES\n- Error en Java ejercicio ${EXERCISE}"
-              fi   
-              if ! bash ./scripts/java/validate_exercise_${EXERCISE}.sh "$ERROR_FLAG" "$ERROR_MESSAGES"; then
-                  ERROR_FLAG=1
-                  ERROR_MESSAGES="$ERROR_MESSAGES\n- Error en Java ejercicio ${EXERCISE}"
+
+              # Validación común
+              if ! bash ./scripts/validate_common.sh "$EXERCISE" >> "$ERROR_FILE"; then
+                echo "- Error en Java (común) ejercicio ${EXERCISE}" >> "$ERROR_FILE"
+                ERROR_FLAG=1
               fi
-              elif [ "${{ env.language }}" == "javascript" ]; then
-                  echo "Validando ejercicio JavaScript ${EXERCISE}"
-                  if ! bash ./scripts/javascript/validate_exercise_${EXERCISE}.sh "$ERROR_FLAG" "$ERROR_MESSAGES"; then
-                      ERROR_FLAG=1
-                      ERROR_MESSAGES="$ERROR_MESSAGES\n- Error en JavaScript ejercicio ${EXERCISE}"
-                  fi
+
+              # Validación específica de Java
+              if ! bash ./scripts/java/validate_exercise_${EXERCISE}.sh >> "$ERROR_FILE"; then
+                echo "- Error en Java ejercicio ${EXERCISE}" >> "$ERROR_FILE"
+                ERROR_FLAG=1
               fi
+
+            elif [ "${{ env.language }}" == "javascript" ]; then
+              echo "Validando ejercicio JavaScript ${EXERCISE}"
+
+              # Validación específica de JavaScript
+              if ! bash ./scripts/javascript/validate_exercise_${EXERCISE}.sh >> "$ERROR_FILE"; then
+                echo "- Error en JavaScript ejercicio ${EXERCISE}" >> "$ERROR_FILE"
+                ERROR_FLAG=1
+              fi
+            fi
           done
 
+          # Verificar si hubo errores
           if [ $ERROR_FLAG -eq 1 ]; then
-            echo -e "Errores encontrados durante la validación:\n$ERROR_MESSAGES"
+            echo "Errores encontrados durante la validación:"
+            cat "$ERROR_FILE"
+
+            # Leer errores y enviarlos a GitHub
+            ERROR_MESSAGES=$(cat "$ERROR_FILE" | jq -R -s '.')
             curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
-            -d "{\"body\": \"Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
+            -d "{\"body\": \"Errores encontrados en la validación del PR:\n${ERROR_MESSAGES}\"}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+
+            # Salir con código de error
             exit 1
+          else
+            echo "Todos los ejercicios validados correctamente."
           fi
 
       # Close the PR if there are validation errors
