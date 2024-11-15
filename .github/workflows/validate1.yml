@@ -1,0 +1,100 @@
+name: Validar Ejercicio Completo
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Chequear el código
+        uses: actions/checkout@v2
+        with:
+          repository: Akradeveloper/Selenium-exercises
+          token: ${{ secrets.TOKEN_GITHUB }}
+          ref: ${{ github.head_ref }}
+
+      # Parse PR description to find marked exercises and language
+      - name: Analizar descripción del PR
+        id: parse_pr_description
+        run: |
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+          # Detect language
+          if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
+            echo "language=java" >> $GITHUB_ENV
+          elif echo "$PR_DESCRIPTION" | grep -q '\- \[X\] JS'; then
+            echo "language=javascript" >> $GITHUB_ENV
+          else
+            echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
+            exit 1
+          fi
+          # Detect exercises
+          EXERCISES=""
+          for i in {1..6}; do
+            if echo "$PR_DESCRIPTION" | grep -q "\- \[X\] Ejercicio $i"; then
+              EXERCISES="$EXERCISES $i"
+            fi
+          done
+          if [ -z "$EXERCISES" ]; then
+            echo "ERROR: No se marcaron ejercicios para validar."
+            exit 1
+          fi
+          echo "marked_exercises=$EXERCISES" >> $GITHUB_ENV
+
+      - name: Verificar contenido del repositorio
+        run: ls -R
+
+      - name: Listar archivos en scripts
+        run: ls -R scripts || echo "La carpeta 'scripts' no existe."
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/java/validate_exercise_*.sh
+          chmod +x scripts/javascript/validate_exercise_*.sh
+          chmod +x scripts/validate_common.sh
+
+      - name: Crear archivo de errores
+        run: echo "" > errors.log
+
+      # Validate based on marked exercises and language
+      - name: Validar ejercicios seleccionados
+        run: |
+          export ERROR_FILE=$(pwd)/errors.log
+          for EXERCISE in ${{ env.marked_exercises }}; do
+            if [ "${{ env.language }}" == "java" ]; then
+              bash ./scripts/validate_common.sh "$EXERCISE"
+              bash ./scripts/java/validate_exercise_${EXERCISE}.sh "$EXERCISE"
+            elif [ "${{ env.language }}" == "javascript" ]; then
+              bash ./scripts/validate_common.sh "$EXERCISE"
+              bash ./scripts/javascript/validate_exercise_${EXERCISE}.sh "$EXERCISE"
+            fi
+          done
+
+          # Verificar si hubo errores
+          if [ $ERROR_FLAG -eq 1 ]; then
+            echo "Errores encontrados durante la validación:"
+            cat "$ERROR_FILE"
+
+            # Leer errores y enviarlos a GitHub
+            ERROR_MESSAGES=$(cat "$ERROR_FILE" | jq -R -s '.')
+            curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
+            -d "{\"body\": \"Errores encontrados en la validación del PR:\n${ERROR_MESSAGES}\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+            exit 1
+          else
+            echo "Todos los ejercicios validados correctamente."
+            exit 0
+          fi
+
+      # Close the PR if there are validation errors
+      - name: Cerrar PR si hay errores
+        if: failure()
+        uses: peter-evans/close-pull@v3
+        with:
+          pull-request-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.TOKEN_GITHUB }}
+          comment: Auto-closing pull request debido a errores en la validación
+          delete-branch: false
