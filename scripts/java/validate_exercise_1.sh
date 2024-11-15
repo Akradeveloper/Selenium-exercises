@@ -2,7 +2,7 @@
 
 EXERCISE=1
 # Llamar a las validaciones comunes
-bash /scripts/validate_common.sh $EXERCISE
+bash ./scripts/validate_common.sh $EXERCISE
 
 # Aquí van las validaciones específicas para el ejercicio 1
 FOLDER="./ejercicio-$EXERCISE"
