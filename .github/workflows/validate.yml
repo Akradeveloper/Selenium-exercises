@@ -402,39 +402,39 @@ jobs:
 
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "4" ]; then
-                # Validar WaitExamplePage.js
+                # Validar HomePage.js
                 if [ ! -f "$FOLDER/src/pages/WaitExamplePage.js" ]; then
-                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo WaitExamplePage.js en $FOLDER/src/pages (JavaScript)"
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo HomePage.js en $FOLDER/src/pages (JavaScript)"
                     ERROR_FLAG=1
                 else
                   # Validar que contiene métodos clave
-                  if ! grep -q "async navigateToHome()" "$FOLDER/src/pages/WaitExamplePage.js"; then
-                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método navigateToHome en WaitExamplePage.js (JavaScript)"
+                  if ! grep -q "async navigateToHome()" "$FOLDER/src/pages/HomePage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método navigateToHome en HomePage.js (JavaScript)"
                     ERROR_FLAG=1
                   fi
-                  if ! grep -q "await page.waitForSelector" "$FOLDER/src/pages/WaitExamplePage.js"; then
-                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el uso de page.waitForSelector para esperas explícitas en WaitExamplePage.js (JavaScript)"
+                  if ! grep -q "await page.waitForSelector" "$FOLDER/src/pages/HomePage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el uso de page.waitForSelector para esperas explícitas en HomePage.js (JavaScript)"
                     ERROR_FLAG=1
                   fi
-                  if ! grep -q "await page.click" "$FOLDER/src/pages/WaitExamplePage.js"; then
-                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método para hacer clic en un botón en WaitExamplePage.js (JavaScript)"
+                  if ! grep -q "await page.click" "$FOLDER/src/pages/HomePage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método para hacer clic en un botón en HomePage.js (JavaScript)"
                     ERROR_FLAG=1
                   fi
                 fi
 
-                # Validar waitExampleTest.js
-                if [ ! -f "$FOLDER/src/tests/waitExampleTest.js" ]; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo waitExampleTest.js en $FOLDER/src/tests (JavaScript)"
+                # Validar homeTest.js
+                if [ ! -f "$FOLDER/src/tests/homeTest.js" ]; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo homeTest.js en $FOLDER/src/tests (JavaScript)"
                   ERROR_FLAG=1
                 else
                   # Validar que usa WaitExamplePage
-                    if ! grep -q "const WaitExamplePage = require('../pages/WaitExamplePage')" "$FOLDER/src/tests/waitExampleTest.js"; then
-                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la importación de WaitExamplePage en waitExampleTest.js (JavaScript)"
+                    if ! grep -q "const WaitExamplePage = require('../pages/WaitExamplePage')" "$FOLDER/src/tests/homeTest.js"; then
+                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la importación de WaitExamplePage en homeTest.js (JavaScript)"
                       ERROR_FLAG=1
                     fi
                     # Validar que contiene una aserción para confirmar la acción
-                    if ! grep -q "expect(page.title()).resolves.toContain('Expected Title')" "$FOLDER/src/tests/waitExampleTest.js"; then
-                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró una aserción para verificar la acción en waitExampleTest.js (JavaScript)"
+                    if ! grep -q "expect(page.title()).resolves.toContain('Expected Title')" "$FOLDER/src/tests/homeTest.js"; then
+                      ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró una aserción para verificar la acción en homeTest.js (JavaScript)"
                       ERROR_FLAG=1
                     fi
                   fi
