@@ -46,8 +46,8 @@ jobs:
 
       - name: Make scripts executable
         run: |
-          chmod +x scripts/java/validate_exercise_*.sh
-          chmod +x scripts/javascript/validate_exercise_*.sh
+          chmod +x ./scripts/java/validate_exercise_*.sh
+          chmod +x ./scripts/javascript/validate_exercise_*.sh
 
       # Validate based on marked exercises and language
       - name: Validar ejercicios seleccionados
@@ -58,10 +58,10 @@ jobs:
           for EXERCISE in ${{ env.marked_exercises }}; do
             if [ "${{ env.language }}" == "java" ]; then
               echo "Validating Java exercise ${EXERCISE}"
-              bash scripts/java/validate_exercise_${EXERCISE}.sh
+              bash ./scripts/java/validate_exercise_${EXERCISE}.sh
             elif [ "${{ env.language }}" == "javascript" ]; then
               echo "Validating JavaScript exercise ${EXERCISE}"
-              bash scripts/javascript/validate_exercise_${EXERCISE}.sh
+              bash ./scripts/javascript/validate_exercise_${EXERCISE}.sh
             fi
           done
 
