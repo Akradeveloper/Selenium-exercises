@@ -62,20 +62,26 @@ jobs:
           ERROR_FLAG=0
           ERROR_MESSAGES=""
           for EXERCISE in ${{ env.marked_exercises }}; do
-            if [ "${{ env.language }}" == "java" ]; then
-              echo "Validating Java exercise ${EXERCISE}"
-              bash ./scripts/java/validate_exercise_${EXERCISE}.sh
-            elif [ "${{ env.language }}" == "javascript" ]; then
-              echo "Validating JavaScript exercise ${EXERCISE}"
-              bash ./scripts/javascript/validate_exercise_${EXERCISE}.sh
-            fi
+          if [ "${{ env.language }}" == "java" ]; then
+              echo "Validando ejercicio Java ${EXERCISE}"
+              if ! bash ./scripts/java/validate_exercise_${EXERCISE}.sh "$ERROR_FLAG" "$ERROR_MESSAGES"; then
+                  ERROR_FLAG=1
+                  ERROR_MESSAGES="$ERROR_MESSAGES\n- Error en Java ejercicio ${EXERCISE}"
+              fi
+              elif [ "${{ env.language }}" == "javascript" ]; then
+                  echo "Validando ejercicio JavaScript ${EXERCISE}"
+                  if ! bash ./scripts/javascript/validate_exercise_${EXERCISE}.sh "$ERROR_FLAG" "$ERROR_MESSAGES"; then
+                      ERROR_FLAG=1
+                      ERROR_MESSAGES="$ERROR_MESSAGES\n- Error en JavaScript ejercicio ${EXERCISE}"
+                  fi
+              fi
           done
 
           if [ $ERROR_FLAG -eq 1 ]; then
             echo -e "Errores encontrados durante la validación:\n$ERROR_MESSAGES"
             curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
-              -d "{\"body\": \"Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
-              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+            -d "{\"body\": \"Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
             exit 1
           fi
 
