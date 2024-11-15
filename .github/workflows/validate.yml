@@ -176,6 +176,8 @@ jobs:
           fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "3" ]; then
+              # TODO: Add validations for exercise 3
+              :
               # Validar HomePage.java
               if [ ! -f "$FOLDER/src/pages/HomePage.java" ]; then
                 ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo HomePage.java en $FOLDER/src/pages (Java)"
@@ -220,47 +222,14 @@ jobs:
           fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "4" ]; then
-              # Validar HomePage.java
-              if [ ! -f "$FOLDER/src/pages/HomePage.java" ]; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo WaitExamplePage.java en $FOLDER/src/pages (Java)"
-                ERROR_FLAG=1
-              else
-                # Validar que contiene métodos clave
-                if ! grep -q 'driver.get("https://www.telerik.com/")' "$FOLDER/src/pages/HomePage.java"; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método para navegar a https://www.telerik.com en HomePage.java (Java)"
-                  ERROR_FLAG=1
-                fi
-                if ! grep -q 'WebDriverWait' "$FOLDER/src/pages/HomePage.java"; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el uso de WebDriverWait para esperas explícitas en HomePage.java (Java)"
-                  ERROR_FLAG=1
-                fi
-                if ! grep -q 'driver.findElement(By.*).click()' "$FOLDER/src/pages/HomePage.java"; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método para hacer clic en un botón en HomePage.java (Java)"
-                  ERROR_FLAG=1
-                fi
-              fi
-              # Validar HomePage.java
-              if [ ! -f "$FOLDER/src/tests/HomePage.java" ]; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo HomePage.java en $FOLDER/src/tests (Java)"
-                ERROR_FLAG=1
-              else
-                # Validar que usa WaitExamplePage
-                if ! grep -q 'WaitExamplePage waitPage = new WaitExamplePage' "$FOLDER/src/tests/HomePage.java"; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el uso de WaitExamplePage en HomePage.java (Java)"
-                  ERROR_FLAG=1
-                fi
-                # Validar que contiene una aserción para confirmar la acción
-                if ! grep -q 'assert.*getTitle.*"Expected Title"' "$FOLDER/src/tests/HomePage.java"; then
-                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró una aserción para verificar la acción en HomePage.java (Java)"
-                  ERROR_FLAG=1
-                fi
-              fi
+              # TODO: Add validations for exercise 4
+              :           
             fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "5" ]; then  
               # TODO: Add validations for exercise 5
               :       
-            fi  
+            fi
             # Add additional Java-specific checks here...
             if [ "$EXERCISE" == "6" ]; then   
               # TODO: Add validations for exercise 6
@@ -269,6 +238,132 @@ jobs:
             
             # Add additional Java-specific checks here...
           }
+          javascript_validation() {
+            EXERCISE=$1
+            FOLDER=$2
+            # Specific validation checks for JavaScript
+            
+            # Add additional JavaScript-specific checks here...
+            # Validate LoginPage.js
+            if [ ! -f "$FOLDER/src/pages/LoginPage.js" ]; then
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.js en el directorio Pages (JavaScript)"
+              ERROR_FLAG=1
+            else
+            # Check for specific selectors related to saucedemo.com
+              if ! grep -q 'https://www.saucedemo.com' "$FOLDER/src/pages/LoginPage.js"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró referencia a https://www.saucedemo.com en LoginPage.js (JavaScript)"
+                ERROR_FLAG=1
+              fi
+              if ! grep -E 'getElementById.*username|getElementById.*password|getElementById.*login-button' "$FOLDER/src/pages/LoginPage.js"; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontraron selectores de usuario, contraseña o botón de login en LoginPage.js (JavaScript)"
+                ERROR_FLAG=1
+              fi
+            fi
+          # Validate LoginTest.js
+          if [ ! -f "$FOLDER/src/test/LoginTest.js" ]; then
+            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginTest.js en el directorio Test (JavaScript)"
+            ERROR_FLAG=1
+          else
+            if ! grep -q "expect.*title.*toBe.*'Swag Labs'" "$FOLDER/src/test/LoginTest.js"; then
+              ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró una validación para el título en LoginTest.js (JavaScript)"
+              ERROR_FLAG=1
+            fi
+          fi
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "2" ]; then
+                # Validar existencia de FormPage.js
+                if [ ! -f "$FOLDER/src/pages/FormPage.js" ]; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormPage.js en el directorio src/pages (JavaScript)"
+                    ERROR_FLAG=1
+                else
+                  # Verificar referencias a elementos del formulario
+                  if ! grep -q 'document.querySelector.*"#firstName"' "$FOLDER/src/pages/FormPage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de nombre en FormPage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                  if ! grep -q 'document.querySelector.*"#userEmail"' "$FOLDER/src/pages/FormPage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de correo electrónico en FormPage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                  if ! grep -q 'document.querySelector.*"#submit"' "$FOLDER/src/pages/FormPage.js"; then
+                    ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el botón de envío en FormPage.js (JavaScript)"
+                    ERROR_FLAG=1
+                  fi
+                fi
+              # Validar existencia de FormTest.js
+              if [ ! -f "$FOLDER/src/tests/FormTest.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormTest.js en el directorio src/tests (JavaScript)"
+                ERROR_FLAG=1
+              else
+                # Verificar la validación del mensaje de éxito
+                if ! grep -q 'expect.*getText.*"Thank you"' "$FOLDER/src/tests/FormTest.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la validación del mensaje de éxito en FormTest.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+              fi
+            fi
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "3" ]; then
+              # TODO: Add validations for exercise 3
+              :
+              # Validar HomePage.js
+              if [ ! -f "$FOLDER/src/pages/HomePage.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo HomePage.js en $FOLDER/src/pages (JavaScript)"
+                ERROR_FLAG=1
+              else
+                # Validar que contiene métodos clave
+                if ! grep -q "async navigateToHome()" "$FOLDER/src/pages/HomePage.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método navigateToHome en HomePage.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+                if ! grep -q "async clickDemoLink()" "$FOLDER/src/pages/HomePage.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método clickDemoLink en HomePage.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+              fi
+              # Validar DemoPage.js
+              if [ ! -f "$FOLDER/src/pages/DemoPage.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo DemoPage.js en $FOLDER/src/pages (JavaScript)"
+                ERROR_FLAG=1
+              else
+                # Validar que contiene método para verificar el título
+                if ! grep -q "async verifyTitle()" "$FOLDER/src/pages/DemoPage.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el método verifyTitle en DemoPage.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+              fi
+              # Validar homeTest.js
+              if [ ! -f "$FOLDER/src/tests/homeTest.js" ]; then
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo homeTest.js en $FOLDER/src/tests (JavaScript)"
+                ERROR_FLAG=1
+              else
+                # Validar que usa HomePage y DemoPage
+                if ! grep -q "const HomePage = require('../pages/HomePage')" "$FOLDER/src/tests/homeTest.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la importación de HomePage en homeTest.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+                if ! grep -q "const DemoPage = require('../pages/DemoPage')" "$FOLDER/src/tests/homeTest.js"; then
+                  ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la importación de DemoPage en homeTest.js (JavaScript)"
+                  ERROR_FLAG=1
+                fi
+              fi
+            fi
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "4" ]; then
+              # TODO: Add validations for exercise 4
+              :           
+            fi
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "5" ]; then  
+              # TODO: Add validations for exercise 5
+              :       
+            fi
+            # Add additional Java-specific checks here...
+            if [ "$EXERCISE" == "6" ]; then   
+              # TODO: Add validations for exercise 6
+              :
+            fi
+            
             # Add additional Java-specific checks here...
             npm install --prefix "$FOLDER" || ERROR_FLAG=1
             npx eslint "$FOLDER/src/" || ERROR_FLAG=1
