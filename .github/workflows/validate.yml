@@ -23,22 +23,33 @@ jobs:
         run: echo "PR_DESCRIPTION=${{ github.event.pull_request.body }}" >> $GITHUB_ENV
 
       # Debugging step to list files in the scripts directory
-      - name: List scripts directory
+      - name: Listar directorio de scripts
         run: ls -la ./scripts/
 
-      # Step 3: Modify scripts to be executable
-      - name: Modificar scripts
-        run: chmod +x ./scripts/*.sh # Use relative path
+      # Step 3: Make scripts executable
+      - name: Modificar permisos de scripts
+        run: chmod +x ./scripts/*.sh
 
-      # Step 4: Analyze the PR description
+      # Step 4: Analyze the PR description and save results to a file
       - name: Analizar descripción del PR
-        run: ./scripts/analyze_pr_description.sh
+        id: analyze_pr
+        run: |
+          ./scripts/analyze_pr_description.sh > analysis_result.txt
+          echo "ANALYSIS_RESULT=$(cat analysis_result.txt)" >> $GITHUB_ENV
+          echo "Ejercicios analizados:"
+          cat analysis_result.txt
 
-      # Step 5: Validate exercises
+      # Step 5: Use the analysis result in validation
       - name: Validar ejercicios seleccionados
-        run: ./scripts/validate_exercises.sh
+        id: validate
+        run: |
+          ./scripts/validate_exercises.sh analysis_result.txt > validation_result.txt
+          echo "VALIDATION_RESULT=$(cat validation_result.txt)" >> $GITHUB_ENV
+          echo "Resultado de validación:"
+          cat validation_result.txt
 
-      # Step 6: Close the PR if there are validation errors
+      # Step 6: Close the PR if validation fails
       - name: Cerrar PR si hay errores
-        if: failure() # This checks if any previous step has failed
-        run: ./scripts/close_pr.sh true # Pass 'true' to indicate that the PR should be closed
+        if: failure()
+        run: |
+          ./scripts/close_pr.sh "VALIDATION_FAILED"
