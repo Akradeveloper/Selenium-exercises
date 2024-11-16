@@ -1,8 +1,8 @@
 #!/bin/bash
 # Analyze the PR description to find marked exercises and language
 
-PR_DESCRIPTION="${PR_DESCRIPTION}"  # Use the environment variable
-# Detect language
+PR_DESCRIPTION="$PR_DESCRIPTION"  # Usa la variable del entorno exportada
+# Detectar lenguaje
 if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
   echo "language=java" >> $GITHUB_ENV
 elif echo "$PR_DESCRIPTION" | grep -q '\- \[X\] JS'; then
@@ -12,9 +12,9 @@ else
   exit 1
 fi
 
-# Detect exercises
+# Detectar ejercicios
 EXERCISES=""
-for i in {1..5}; do
+for i in {1..9}; do
   if echo "$PR_DESCRIPTION" | grep -q "\- \[X\] Ejercicio $i"; then
     EXERCISES="$EXERCISES $i"
   fi
