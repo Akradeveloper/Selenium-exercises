@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Mod scripts
+      # Step 1: Modify scripts to be executable
       - name: Modificar scripts
-        run: chmod +x /scripts/*.sh
+        run: chmod +x ./scripts/*.sh # Use relative path
 
       # Step 2: Checkout the code
       - name: Chequear el código
