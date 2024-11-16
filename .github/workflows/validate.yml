@@ -20,8 +20,7 @@ jobs:
 
       # Step 2: Set PR description as an environment variable
       - name: Set PR description
-        run: echo "PR_DESCRIPTION=${{ github.event.pull_request.body }}" >> $GITHUB_ENV
-
+        run: echo "PR_DESCRIPTION=${{ toJSON(github.event.pull_request.body) }}" >> $GITHUB_ENV
       # Debugging step to list files in the scripts directory
       - name: Listar directorio de scripts
         run: ls -la ./scripts/
