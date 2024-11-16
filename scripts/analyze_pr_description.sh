@@ -1,7 +1,7 @@
 #!/bin/bash
 # Analyze the PR description to find marked exercises and language
 
-PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+PR_DESCRIPTION="${PR_DESCRIPTION}"  # Use the environment variable
 # Detect language
 if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
   echo "language=java" >> $GITHUB_ENV

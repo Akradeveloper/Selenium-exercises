@@ -18,23 +18,27 @@ jobs:
           token: ${{ secrets.TOKEN_GITHUB }}
           ref: ${{ github.head_ref }}
 
+      # Step 2: Set PR description as an environment variable
+      - name: Set PR description
+        run: echo "PR_DESCRIPTION=${{ github.event.pull_request.body }}" >> $GITHUB_ENV
+
       # Debugging step to list files in the scripts directory
       - name: List scripts directory
         run: ls -la ./scripts/
 
-      # Step 2: Modify scripts to be executable
+      # Step 3: Modify scripts to be executable
       - name: Modificar scripts
         run: chmod +x ./scripts/*.sh # Use relative path
 
-      # Step 3: Analyze the PR description
+      # Step 4: Analyze the PR description
       - name: Analizar descripción del PR
         run: ./scripts/analyze_pr_description.sh
 
-      # Step 4: Validate exercises
+      # Step 5: Validate exercises
       - name: Validar ejercicios seleccionados
         run: ./scripts/validate_exercises.sh
 
-      # Step 5: Close the PR if there are validation errors
+      # Step 6: Close the PR if there are validation errors
       - name: Cerrar PR si hay errores
         if: failure() # This checks if any previous step has failed
         run: ./scripts/close_pr.sh true # Pass 'true' to indicate that the PR should be closed
