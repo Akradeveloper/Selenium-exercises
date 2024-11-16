@@ -10,17 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
+      - name: Chequear el código
+        uses: actions/checkout@v2
+        with:
+          repository: Akradeveloper/Selenium-exercises
+          token: ${{ secrets.TOKEN_GITHUB }}
+          ref: ${{ github.head_ref }}
+
       # Debugging step to list files in the scripts directory
       - name: List scripts directory
         run: ls -la ./scripts/
 
-      # Step 1: Modify scripts to be executable
+      # Step 2: Modify scripts to be executable
       - name: Modificar scripts
         run: chmod +x ./scripts/*.sh # Use relative path
-
-      # Step 2: Checkout the code
-      - name: Chequear el código
-        run: ./scripts/checkout_code.sh
 
       # Step 3: Analyze the PR description
       - name: Analizar descripción del PR
