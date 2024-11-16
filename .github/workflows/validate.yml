@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Debugging step to list files in the scripts directory
+      - name: List scripts directory
+        run: ls -la ./scripts/
+
       # Step 1: Modify scripts to be executable
       - name: Modificar scripts
         run: chmod +x ./scripts/*.sh # Use relative path
