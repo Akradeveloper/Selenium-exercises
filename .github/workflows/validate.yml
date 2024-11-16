@@ -12,7 +12,7 @@ jobs:
     steps:
       # Step 1: Mod scripts
       - name: Modificar scripts
-        run: chmod +x scripts/*.sh
+        run: chmod +x /scripts/*.sh
 
       # Step 2: Checkout the code
       - name: Chequear el código
