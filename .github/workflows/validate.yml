@@ -28,4 +28,5 @@ jobs:
 
       # Step 5: Close the PR if there are validation errors
       - name: Cerrar PR si hay errores
-        run: ./scripts/close_pr.sh ${{ failure() }}
+        if: failure() # This checks if any previous step has failed
+        run: ./scripts/close_pr.sh true # Pass 'true' to indicate that the PR should be closed
