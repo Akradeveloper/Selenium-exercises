@@ -1,0 +1,22 @@
+name: Post Results to PR
+
+on:
+  pull_request:
+    types: [synchronize]
+
+jobs:
+  post-results:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Post validation results
+        run: |
+          if [ $ERROR_FLAG -eq 1 ]; then
+            curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
+              -d "{\"body\": \"Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+            exit 1
+          else
+            curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
+              -d "{\"body\": \"Validación completada sin errores.\"}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"

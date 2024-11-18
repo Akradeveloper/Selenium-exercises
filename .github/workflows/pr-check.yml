@@ -1,0 +1,45 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  check-pr-description:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Parse PR description
+        id: parse_pr_description
+        run: |
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+          # Detectar lenguaje
+          if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
+            echo "language=java" >> $GITHUB_ENV
+          elif echo "$PR_DESCRIPTION" | grep -q '\- \[X\] JS'; then
+            echo "language=javascript" >> $GITHUB_ENV
+          else
+            echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
+            exit 1
+          fi
+
+          # Detectar ejercicios
+          EXERCISES=""
+          for i in {1..5}; do
+            if echo "$PR_DESCRIPTION" | grep -q "\- \[X\] Ejercicio $i"; then
+              EXERCISES="$EXERCISES $i"
+            fi
+          done
+          if [ -z "$EXERCISES" ]; then
+            echo "ERROR: No se marcaron ejercicios para validar."
+            exit 1
+          fi
+          echo "marked_exercises=$EXERCISES" >> $GITHUB_ENV
+
+      - name: Log results
+        run: |
+          echo "Lenguaje detectado: ${{ env.language }}"
+          echo "Ejercicios marcados: ${{ env.marked_exercises }}"

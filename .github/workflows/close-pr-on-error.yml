@@ -1,0 +1,19 @@
+name: Close PR on Error
+
+on:
+  pull_request:
+    types: [synchronize]
+
+jobs:
+  close-pr:
+    if: failure()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Close PR
+        uses: peter-evans/close-pull@v3
+        with:
+          pull-request-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.TOKEN_GITHUB }}
+          comment: Auto-closing pull request due to validation errors.
+          delete-branch: false
