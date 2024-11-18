@@ -1,17 +1,16 @@
-name: PR Validation Workflow
+name: PR Validation
 
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
 
 jobs:
-  # Job para analizar la descripción del PR
   analyze-pr-description:
     runs-on: ubuntu-latest
     outputs:
-      pr_number: ${{ steps.set-pr-number.outputs.pr_number }}
-      language: ${{ steps.set-language.outputs.language }}
-      marked_exercises: ${{ steps.set-marked-exercises.outputs.marked_exercises }}
+      pr_number: ${{ steps.analyze-pr.outputs.pr_number }}
+      language: ${{ steps.analyze-pr.outputs.language }}
+      marked_exercises: ${{ steps.analyze-pr.outputs.marked_exercises }}
 
     steps:
       - name: Checkout code
@@ -23,9 +22,13 @@ jobs:
           chmod +x ./scripts/analyze-pr-description.sh
           ./scripts/analyze-pr-description.sh "${{ github.event.pull_request.body }}" # Pasa el cuerpo del PR como parámetro
 
-          echo "language=${LANGUAGE}" > pr_info.txt
-          echo "marked_exercises=${EXERCISES}" >> pr_info.txt
-          echo "pr_number=${{ github.event.pull_request.number }}" >> pr_info.txt
+      - name: Save PR information to file
+        id: save-pr-info
+        run: |
+          # El script ya debe haber definido las variables LANGUAGE y EXERCISES
+          echo "LANGUAGE=$LANGUAGE" > pr_info.txt
+          echo "EXERCISES=$EXERCISES" >> pr_info.txt
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> pr_info.txt
 
       - name: Upload PR information as artifact
         uses: actions/upload-artifact@v3
@@ -33,7 +36,6 @@ jobs:
           name: pr_info
           path: pr_info.txt
 
-  # Job para validar los ejercicios
   validate-pr:
     needs: analyze-pr-description
     runs-on: ubuntu-latest
@@ -47,28 +49,19 @@ jobs:
           name: pr_info
           path: .
 
-      - name: Extract PR information from artifact
+      - name: Load PR information from file
         run: |
-          # Leer el contenido del archivo descargado para obtener las variables
-          PR_INFO=$(cat pr_info.txt)
-
-          # Extraer las variables del archivo usando comandos bash
-          LANGUAGE=$(echo "$PR_INFO" | grep "language=" | cut -d '=' -f2)
-          EXERCISES=$(echo "$PR_INFO" | grep "marked_exercises=" | cut -d '=' -f2)
-          PR_NUMBER=$(echo "$PR_INFO" | grep "pr_number=" | cut -d '=' -f2)
-
-          echo "language=$LANGUAGE"
-          echo "marked_exercises=$EXERCISES"
-          echo "pr_number=$PR_NUMBER"
+          source pr_info.txt
+          echo "Loaded variables from pr_info.txt"
+          echo "Language: $LANGUAGE"
+          echo "Exercises: $EXERCISES"
+          echo "PR Number: $PR_NUMBER"
 
       - name: Run validate-pr script
-        id: validate-pr
         run: |
-          # Ahora que las variables están definidas, las pasamos al script
           chmod +x ./scripts/validate-pr.sh
           ./scripts/validate-pr.sh "$LANGUAGE" "$EXERCISES" # Pasa el lenguaje y ejercicios como parámetros
 
-          # Guardar los resultados del script
           echo "error_flag=${ERROR_FLAG}" > validation_result.txt
           echo "error_messages=${ERROR_MESSAGES}" >> validation_result.txt
 
@@ -78,7 +71,6 @@ jobs:
           name: validation_results
           path: validation_result.txt
 
-          # Job para publicar los resultados en el PR
   post-results:
     needs: validate-pr
     runs-on: ubuntu-latest
@@ -92,25 +84,15 @@ jobs:
           name: validation_results
           path: .
 
-      - name: Extract validation results from artifact
-        run: |
-          # Leer el contenido del archivo descargado para obtener las variables
-          VALIDATION_RESULTS=$(cat validation_result.txt)
-
-          # Extraer las variables del archivo usando comandos bash
-          ERROR_FLAG=$(echo "$VALIDATION_RESULTS" | grep "error_flag=" | cut -d '=' -f2)
-          ERROR_MESSAGES=$(echo "$VALIDATION_RESULTS" | grep "error_messages=" | cut -d '=' -f2)
-          PR_NUMBER=$(echo "$VALIDATION_RESULTS" | grep "pr_number=" | cut -d '=' -f2)
-
-          echo "error_flag=$ERROR_FLAG"
-          echo "error_messages=$ERROR_MESSAGES"
-          echo "pr_number=$PR_NUMBER"
-
       - name: Run post-results script
         run: |
-          # Ahora que las variables están definidas, las pasamos al script
+          # Cargar los resultados de validación
+          source validation_result.txt
+
+          # Usar las variables cargadas
           chmod +x ./scripts/post-results.sh
-          ./scripts/post-results.sh "$ERROR_FLAG" "$ERROR_MESSAGES" "$PR_NUMBER" # Pasa el error_flag, error_messages y pr_number como parámetros
+          ./scripts/post-results.sh "$ERROR_FLAG" "$ERROR_MESSAGES" "$PR_NUMBER"
+
   close-pr:
     needs: post-results
     if: ${{ needs.post-results.outputs.error_flag == '1' }}
@@ -118,12 +100,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Extract PR number from previous job
-        run: |
-          # Extraer PR number desde la variable del trabajo anterior
-          PR_NUMBER="${{ needs.post-results.outputs.pr_number }}"
-          echo "PR number: $PR_NUMBER"
 
       - name: Run close-pr script
         run: |
