@@ -22,19 +22,18 @@ jobs:
           echo "ERROR_MESSAGES=$ERROR_MESSAGES"
 
           # Obtener el número del PR desde el entorno
-          PR_NUMBER=${{ env.pr_number }}
-          echo "PR_NUMBER=$PR_NUMBER"
+          echo "${{ env.pr_number }}"
 
           if [ "$ERROR_FLAG" -eq "1" ]; then
             # Publicar comentario de error en PR
             curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
               -d "{\"body\": \"❌ Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
-              "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.pr_number }}/comments"
           else
             # Publicar comentario de éxito en PR
             curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
               -d "{\"body\": \"✅ Validación completada sin errores.\"}" \
-              "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
+              "https://api.github.com/repos/${{ github.repository }}/issues/${{ env.pr_number }}/comments"
           fi
 
           # Exportar estado para el siguiente workflow
