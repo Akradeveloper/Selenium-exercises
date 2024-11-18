@@ -29,3 +29,4 @@ fi
 echo "LANGUAGE=$LANGUAGE" >> pr_info.txt
 echo "EXERCISES=$EXERCISES" >> pr_info.txt
 echo "pr_number=$PR_NUMBER" >> pr_info.txt
+
