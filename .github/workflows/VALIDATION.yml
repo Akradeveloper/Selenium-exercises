@@ -27,6 +27,9 @@ jobs:
         with:
           name: pr_info
           path: pr_info.txt
+      - name: Preview pr_info.txt content
+        run: |
+          cat pr_info.txt
 
   validate-pr:
     needs: analyze-pr-description
