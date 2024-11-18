@@ -16,6 +16,10 @@ jobs:
           repository: Akradeveloper/Selenium-exercises
           token: ${{ secrets.TOKEN_GITHUB }}
           ref: ${{ github.head_ref }}
+
+      - name: Verificar la existencia de get_pr_details.sh
+        run: |
+          ls -l ./scripts/get_pr_details.sh
       - name: Forzar permisos de ejecución
         run: |
           chmod -R +x ./scripts
