@@ -9,8 +9,6 @@ errores=$4
 # Si hay errores, agregar un comentario en el PR
 if [[ -n "$errores" ]]; then
   echo "Se encontraron errores, enviando comentario en el PR..."
-  cat validation_errors.txt
-
   curl -X POST -H "Authorization: token $TOKEN_GITHUB" \
        -d "{\"body\": \"${errores}\"}" \
        "https://api.github.com/repos/$REPOSITORY/issues/$PR/comments"
