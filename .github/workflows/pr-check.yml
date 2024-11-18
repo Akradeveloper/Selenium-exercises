@@ -17,6 +17,9 @@ jobs:
         run: |
           PR_DESCRIPTION="${{ github.event.pull_request.body }}"
 
+          # Exportar el número del PR
+          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+
           # Detectar lenguaje
           if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
             echo "language=java" >> $GITHUB_ENV
@@ -24,6 +27,8 @@ jobs:
             echo "language=javascript" >> $GITHUB_ENV
           else
             echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
+            echo "error_flag=1" >> $GITHUB_ENV
+            echo "error_messages=No se especificó el lenguaje de programación o más de uno fue marcado." >> $GITHUB_ENV
             exit 1
           fi
 
@@ -36,6 +41,8 @@ jobs:
           done
           if [ -z "$EXERCISES" ]; then
             echo "ERROR: No se marcaron ejercicios para validar."
+            echo "error_flag=1" >> $GITHUB_ENV
+            echo "error_messages=No se marcaron ejercicios para validar." >> $GITHUB_ENV
             exit 1
           fi
           echo "marked_exercises=$EXERCISES" >> $GITHUB_ENV
@@ -51,3 +58,10 @@ jobs:
           # Usar la nueva sintaxis para establecer los outputs
           echo "language=${{ env.language }}" >> $GITHUB_OUTPUT
           echo "marked_exercises=${{ env.marked_exercises }}" >> $GITHUB_OUTPUT
+
+      - name: Check for errors and exit
+        if: ${{ env.error_flag == '1' }}
+        run: |
+          echo "Se encontraron errores durante la validación del PR."
+          echo "Errores: ${{ env.error_messages }}"
+          exit 1

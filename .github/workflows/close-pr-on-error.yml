@@ -15,7 +15,7 @@ jobs:
       - name: Close PR
         uses: peter-evans/close-pull@v3
         with:
-          pull-request-number: ${{ github.event.workflow_run.pull_requests[0].number }}
+          pull-request-number: ${{ github.event.workflow_run.pull_requests.number }}
           token: ${{ secrets.TOKEN_GITHUB }}
           comment: "❌ Auto-closing pull request due to validation errors."
           delete-branch: false
