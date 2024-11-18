@@ -26,7 +26,6 @@ if [ -z "$EXERCISES" ]; then
 fi
 
 # Guardar los resultados en el archivo para su uso posterior
-echo "LANGUAGE=$LANGUAGE" >> pr_info.txt
+echo "LANGUAGE=$LANGUAGE" > pr_info.txt
 echo "EXERCISES=$EXERCISES" >> pr_info.txt
-echo "pr_number=$PR_NUMBER" >> pr_info.txt
-
+echo "PR_NUMBER=$PR_NUMBER" >> pr_info.txt
