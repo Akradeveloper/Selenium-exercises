@@ -88,28 +88,28 @@ java_validation() {
     # Specific validation checks for Java
     if [ "$EXERCISE" == "1" ]; then
         if [ ! -f "$FOLDER/src/pages/LoginPage.java" ]; then
-            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.java en el directorio Pages (Java)"
+            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginPage.java en el directorio Pages (Java Ejercicio-$EXERCISE)"
             ERROR_FLAG=1
         else
             if ! grep -q 'https://www.saucedemo.com' "$FOLDER/src/pages/LoginPage.java"; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró referencia a https://www.saucedemo.com en LoginPage.java (Java)"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró referencia a https://www.saucedemo.com en LoginPage.java (Java Ejercicio-$EXERCISE)"
                 ERROR_FLAG=1
             fi
             if ! grep -E 'By\..*username|By\..*password|By\..*login-button' "$FOLDER/src/pages/LoginPage.java"; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontraron selectores de usuario, contraseña o botón de login en LoginPage.java (Java)"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontraron selectores de usuario, contraseña o botón de login en LoginPage.java (Java Ejercicio-$EXERCISE)"
                 ERROR_FLAG=1
             fi
         fi
         if [ ! -f "$FOLDER/src/pages/LoginTest.java" ]; then
-            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginTest.java en el directorio Test (Java)"
+            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginTest.java en el directorio Test (Java Ejercicio-$EXERCISE)"
             ERROR_FLAG=1
         else      
             if ! grep -r "assert.*getTitle.*\"Swag Labs\"" "$FOLDER/src/test/java/LoginTest.java"; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginTest.java en el directorio Test (Java)"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo LoginTest.java en el directorio Test (Java Ejercicio-$EXERCISE)"
                 ERROR_FLAG=1
             fi
             if ! grep -r "await driver.getTitle().contains.*'Swag Labs'" "$FOLDER/src/test/java/LoginTest.java"; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginTest (Java)"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un assert para el título en el test de LoginTest (Java Ejercicio-$EXERCISE)"
                 ERROR_FLAG=1
             fi
         fi 
@@ -118,29 +118,29 @@ java_validation() {
     # Additional validations for exercises 2 to 6...
     if [ "$EXERCISE" == "2" ]; then
         if [ ! -f "$FOLDER/src/pages/FormPage.java" ]; then
-            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormPage.java en el directorio src/pages (Java)"
+            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormPage.java en el directorio src/pages (Java Ejercicio-$EXERCISE)"
             ERROR_FLAG=1
         else
             if ! grep -q 'By.*name.*"firstName"' "$FOLDER/src/pages/FormPage.java"; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de nombre en FormPage.java (Java)"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de nombre en FormPage.java (Java Ejercicio-$EXERCISE)"
                 ERROR_FLAG=1
             fi
             if ! grep -q 'By.*email.*"userEmail"' "$FOLDER/src/pages/FormPage.java"; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de correo electrónico en FormPage.java (Java)"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el campo de correo electrónico en FormPage.java (Java Ejercicio-$EXERCISE)"
                 ERROR_FLAG=1
             fi
             if ! grep -q 'By.*button.*"submit"' "$FOLDER/src/pages/FormPage.java"; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el botón de envío en FormPage.java (Java)"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró un selector para el botón de envío en FormPage.java (Java Ejercicio-$EXERCISE)"
                 ERROR_FLAG=1
             fi
         fi
 
         if [ ! -f "$FOLDER/src/tests/FormTest.java" ]; then
-            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormTest.java en el directorio src/tests (Java)"
+            ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró el archivo FormTest.java en el directorio src/tests (Java Ejercicio-$EXERCISE)"
             ERROR_FLAG=1
         else
             if ! grep -q 'assert.*getText.*"Thank you"' "$FOLDER/src/tests/FormTest.java"; then
-                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la validación del mensaje de éxito en FormTest.java (Java)"
+                ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: No se encontró la validación del mensaje de éxito en FormTest.java (Java Ejercicio-$EXERCISE)"
                 ERROR_FLAG=1
             fi
         fi
