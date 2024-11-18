@@ -25,6 +25,7 @@ if [ -z "$EXERCISES" ]; then
   exit 1
 fi
 
-# Exportar los resultados para usarlos en el siguiente paso
-echo "LANGUAGE=$LANGUAGE" >> $GITHUB_ENV
-echo "EXERCISES=$EXERCISES" >> $GITHUB_ENV
+# Guardar los resultados en el archivo para su uso posterior
+echo "LANGUAGE=$LANGUAGE" >> pr_info.txt
+echo "EXERCISES=$EXERCISES" >> pr_info.txt
+echo "pr_number=$PR_NUMBER" >> pr_info.txt

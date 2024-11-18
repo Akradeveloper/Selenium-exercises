@@ -9,9 +9,9 @@ jobs:
   analyze-pr-description:
     runs-on: ubuntu-latest
     outputs:
-      pr_number: ${{ steps.set-pr-number.outputs.pr_number }}
-      language: ${{ steps.set-language.outputs.language }}
-      marked_exercises: ${{ steps.set-marked-exercises.outputs.marked_exercises }}
+      pr_number: ${{ steps.analyze-pr.outputs.pr_number }}
+      language: ${{ steps.analyze-pr.outputs.language }}
+      marked_exercises: ${{ steps.analyze-pr.outputs.marked_exercises }}
 
     steps:
       - name: Checkout code
@@ -23,9 +23,15 @@ jobs:
           chmod +x ./scripts/analyze-pr-description.sh
           ./scripts/analyze-pr-description.sh "${{ github.event.pull_request.body }}" # Pasa el cuerpo del PR como parámetro
 
-          echo "language=${LANGUAGE}" > pr_info.txt
-          echo "marked_exercises=${EXERCISES}" >> pr_info.txt
-          echo "pr_number=${{ github.event.pull_request.number }}" >> pr_info.txt
+          # Establecer las variables como salidas de este paso
+          echo "language=$LANGUAGE" >> $GITHUB_ENV
+          echo "marked_exercises=$EXERCISES" >> $GITHUB_ENV
+          echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+
+          # Además, configurar las salidas de la acción
+          echo "::set-output name=language::$LANGUAGE"
+          echo "::set-output name=marked_exercises::$EXERCISES"
+          echo "::set-output name=pr_number::${{ github.event.pull_request.number }}"
 
       - name: Upload PR information as artifact
         uses: actions/upload-artifact@v3
