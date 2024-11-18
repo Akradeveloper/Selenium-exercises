@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Accede a las variables del PR pasadas como entorno a través del contexto
+PR_BODY="${{ github.event.pull_request.body }}"
+PR_TITLE="${{ github.event.pull_request.title }}"
+PR_NUMBER="${{ github.event.pull_request.number }}"
+
 # Imprime los detalles
 echo "PR Body: $PR_BODY"
 echo "PR Title: $PR_TITLE"
