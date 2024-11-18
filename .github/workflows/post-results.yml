@@ -16,7 +16,7 @@ jobs:
         run: |
           # Asignar valores predeterminados a las variables si no están definidas
           ERROR_FLAG=${{ github.event.workflow_run.outputs.error_flag || 0 }}
-          ERROR_MESSAGES=${{ github.event.workflow_run.outputs.error_messages || "" }}
+          ERROR_MESSAGES=${{ github.event.workflow_run.outputs.error_messages || '""' }}
 
           echo "ERROR_FLAG=$ERROR_FLAG"
           echo "ERROR_MESSAGES=$ERROR_MESSAGES"
@@ -34,7 +34,7 @@ jobs:
           fi
 
           # Exportar estado para el siguiente workflow
-          echo "::set-output name=should_close::${ERROR_FLAG}"
+          echo "should_close=$ERROR_FLAG" >> $GITHUB_OUTPUT
 
       - name: Set output for should_close
         run: |

@@ -16,6 +16,7 @@ jobs:
         id: parse_pr_description
         run: |
           PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+
           # Detectar lenguaje
           if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
             echo "language=java" >> $GITHUB_ENV
@@ -47,5 +48,6 @@ jobs:
       - name: Set outputs
         id: set_outputs
         run: |
-          echo "::set-output name=language::${{ env.language }}"
-          echo "::set-output name=marked_exercises::${{ env.marked_exercises }}"
+          # Usar la nueva sintaxis para establecer los outputs
+          echo "language=${{ env.language }}" >> $GITHUB_OUTPUT
+          echo "marked_exercises=${{ env.marked_exercises }}" >> $GITHUB_OUTPUT
