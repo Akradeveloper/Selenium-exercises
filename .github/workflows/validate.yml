@@ -16,18 +16,17 @@ jobs:
           repository: Akradeveloper/Selenium-exercises
           token: ${{ secrets.TOKEN_GITHUB }}
           ref: ${{ github.head_ref }}
-
+      - name: Forzar permisos de ejecución
+        run: |
+          chmod -R +x ./scripts
       - name: Obtener detalles del PR
         run: |
-          chmod +x ./scripts/get_pr_details.sh
           ./scripts/get_pr_details.sh
 
       - name: Validar ejercicios seleccionados
         run: |
-          chmod +x ./scripts/validate_exercise.sh
           ./scripts/validate_exercise.sh
 
       - name: Cerrar PR si hay errores
         run: |
-          chmod +x ./scripts/close_pr.sh
           ./scripts/close_pr.sh
