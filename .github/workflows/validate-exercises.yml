@@ -14,6 +14,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Get PR Check outputs
+        id: get_pr_check_outputs
+        run: |
+          # Obtener los valores de language y marked_exercises del workflow anterior
+          LANGUAGE=${{ github.event.workflow_run.outputs.language }}
+          EXERCISES=${{ github.event.workflow_run.outputs.marked_exercises }}
+
+          echo "Language: $LANGUAGE"
+          echo "Exercises to validate: $EXERCISES"
+
+          # Guardar las variables para su uso posterior
+          echo "LANGUAGE=$LANGUAGE" >> $GITHUB_ENV
+          echo "EXERCISES=$EXERCISES" >> $GITHUB_ENV
+        # Aquí debes agregar la lógica para validar los ejercicios
       - name: Validate marked exercises
         run: |
           ERROR_FLAG=0
@@ -21,8 +35,9 @@ jobs:
           validate_exercise() {
             EXERCISE=$1
             FOLDER="./ejercicio-$EXERCISE"
-            LANGUAGE="${{ env.language }}"
-            # General validation checks
+            LANGUAGE="$LANGUAGE"
+
+            echo "Validando ejercicio: $EXERCISE, Directorio: $FOLDER"            # General validation checks
             if [ ! -d "$FOLDER/src/pages" ]; then
               ERROR_MESSAGES="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
               ERROR_FLAG=1

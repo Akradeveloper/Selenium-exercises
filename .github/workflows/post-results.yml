@@ -14,9 +14,12 @@ jobs:
       - name: Get validation results
         id: get_validation_results
         run: |
-          # Se deben obtener las variables ERROR_FLAG y ERROR_MESSAGES de algún paso anterior
-          ERROR_FLAG=${{ github.event.workflow_run.outputs.error_flag }}
-          ERROR_MESSAGES=${{ github.event.workflow_run.outputs.error_messages }}
+          # Asignar valores predeterminados a las variables si no están definidas
+          ERROR_FLAG=${{ github.event.workflow_run.outputs.error_flag || 0 }}
+          ERROR_MESSAGES=${{ github.event.workflow_run.outputs.error_messages || "" }}
+
+          echo "ERROR_FLAG=$ERROR_FLAG"
+          echo "ERROR_MESSAGES=$ERROR_MESSAGES"
 
           if [ "$ERROR_FLAG" -eq "1" ]; then
             # Publicar comentario de error en PR
