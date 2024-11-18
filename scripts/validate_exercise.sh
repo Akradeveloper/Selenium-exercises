@@ -82,7 +82,7 @@ java_validation() {
     mvn -f "$FOLDER/pom.xml" checkstyle:check
     if [ $? -ne 0 ]; then
         ERROR_MESSAGES="ERROR: Maven checkstyle falló en el proyecto"
-        echo "$ERROR_MESSAGES" >> $ERROR_LOG
+        echo "$ERROR_MESSAGES"
         ERROR_FLAG=1
     fi    
     # Specific validation checks for Java
@@ -262,6 +262,8 @@ done
 if [ $ERROR_FLAG -eq 1 ] || [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
   echo -e "$ERROR_MESSAGES" > validation_errors.txt
   echo "Errores encontrados y guardados en validation_errors.txt."
+  # Mostrar el contenido del archivo validation_errors.txt en los logs
+  cat validation_errors.txt
 else
   echo "Validación completada sin errores."
 fi
