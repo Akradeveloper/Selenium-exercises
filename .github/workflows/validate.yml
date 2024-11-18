@@ -19,7 +19,7 @@ jobs:
 
       - name: Verificar la existencia de get_pr_details.sh
         run: |
-          ls -l ./scripts/get_pr_details.sh
+          ls -l ./scripts/
       - name: Forzar permisos de ejecución
         run: |
           chmod -R +x ./scripts
