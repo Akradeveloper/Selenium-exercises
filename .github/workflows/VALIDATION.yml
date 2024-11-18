@@ -8,10 +8,7 @@ jobs:
   analyze-pr-description:
     runs-on: ubuntu-latest
     outputs:
-      pr_number: ${{ steps.save-pr-info.outputs.pr_number }}
-      language: ${{ steps.save-pr-info.outputs.language }}
-      marked_exercises: ${{ steps.save-pr-info.outputs.marked_exercises }}
-
+      workflow_info_path: ${{ steps.save-pr-info.outputs.workflow_info_path }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -20,16 +17,20 @@ jobs:
         id: analyze-pr
         run: |
           chmod +x ./scripts/analyze-pr-description.sh
-          ./scripts/analyze-pr-description.sh "${{ github.event.pull_request.body }}" # Pasa el cuerpo del PR como parámetro
+          ./scripts/analyze-pr-description.sh "${{ github.event.pull_request.body }}"
+
+          # Guardar información relevante en un archivo
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" > workflow_info.env
+          echo "LANGUAGE=$(cat language.txt)" >> workflow_info.env
+          echo "MARKED_EXERCISES=$(cat exercises.txt)" >> workflow_info.env
+          echo "ERROR_FLAG=0" >> workflow_info.env
+          echo "ERROR_MESSAGES=" >> workflow_info.env
 
       - name: Upload PR information as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: pr_info
-          path: pr_info.txt
-      - name: Preview pr_info.txt content
-        run: |
-          cat pr_info.txt
+          name: workflow_info
+          path: workflow_info.env
 
   validate-pr:
     needs: analyze-pr-description
@@ -38,33 +39,34 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Download PR information
+      - name: Download workflow information
         uses: actions/download-artifact@v3
         with:
-          name: pr_info
+          name: workflow_info
           path: .
 
-      - name: Load PR information from file
+      - name: Load workflow information
         run: |
-          source pr_info.txt
-          echo "Loaded variables from pr_info.txt"
-          echo "Language: $LANGUAGE"
-          echo "Exercises: $EXERCISES"
+          source workflow_info.env
+          echo "Loaded variables:"
           echo "PR Number: $PR_NUMBER"
+          echo "Language: $LANGUAGE"
+          echo "Exercises: $MARKED_EXERCISES"
 
       - name: Run validate-pr script
         run: |
           chmod +x ./scripts/validate-pr.sh
-          ./scripts/validate-pr.sh "$LANGUAGE" "$EXERCISES" # Pasa el lenguaje y ejercicios como parámetros
+          ./scripts/validate-pr.sh "$LANGUAGE" "$MARKED_EXERCISES"
 
-          echo "error_flag=${ERROR_FLAG}" > validation_result.txt
-          echo "error_messages=${ERROR_MESSAGES}" >> validation_result.txt
+          # Agregar errores al archivo
+          echo "ERROR_FLAG=1" >> workflow_info.env
+          echo "ERROR_MESSAGES=${ERROR_MESSAGES} | Validation errors found" >> workflow_info.env
 
-      - name: Upload validation results as artifact
+      - name: Upload updated workflow information
         uses: actions/upload-artifact@v3
         with:
-          name: validation_results
-          path: validation_result.txt
+          name: workflow_info
+          path: workflow_info.env
 
   post-results:
     needs: validate-pr
@@ -73,17 +75,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Download validation results
+      - name: Download workflow information
         uses: actions/download-artifact@v3
         with:
-          name: validation_results
+          name: workflow_info
           path: .
 
       - name: Run post-results script
         run: |
-          source validation_result.txt
+          source workflow_info.env
           chmod +x ./scripts/post-results.sh
           ./scripts/post-results.sh "$ERROR_FLAG" "$ERROR_MESSAGES" "$PR_NUMBER"
+
+          # Actualizar archivo si es necesario
+          echo "Post-results script executed." >> workflow_info.env
+
+      - name: Upload final workflow information
+        uses: actions/upload-artifact@v3
+        with:
+          name: workflow_info
+          path: workflow_info.env
 
   close-pr:
     needs: post-results
@@ -93,7 +104,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Download workflow information
+        uses: actions/download-artifact@v3
+        with:
+          name: workflow_info
+          path: .
+
       - name: Run close-pr script
         run: |
+          source workflow_info.env
           chmod +x ./scripts/close-pr.sh
-          ./scripts/close-pr.sh "$PR_NUMBER" # Pasa el pr_number como parámetro
+          ./scripts/close-pr.sh "$PR_NUMBER"
