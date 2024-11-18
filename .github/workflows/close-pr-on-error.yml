@@ -16,6 +16,6 @@ jobs:
         uses: peter-evans/close-pull@v3
         with:
           pull-request-number: ${{ github.event.workflow_run.pull_requests[0].number }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.TOKEN_GITHUB }}
           comment: "❌ Auto-closing pull request due to validation errors."
           delete-branch: false
