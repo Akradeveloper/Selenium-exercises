@@ -31,5 +31,5 @@ jobs:
           ./scripts/validate_exercise.sh
       - name: Cerrar PR si hay errores
         run: |
-          errors=$(cat validation_errors.txt | tr '\n' ' ')
+          errores=$(cat validation_errors.txt | jq -Rs .)  
           ./scripts/close_pr.sh "${{ secrets.TOKEN_GITHUB }}" "${{ github.repository }}" ${{ github.event.pull_request.number }} "$errors"
