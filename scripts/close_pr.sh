@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # Leer los errores del archivo generado en la validación
-errores=$(cat validation_errors.txt)
 TOKEN_GITHUB=$1
 REPOSITORY=$2
 PR=$3
+errores=$4
+
 # Si hay errores, agregar un comentario en el PR
 if [[ -n "$errores" ]]; then
   echo "Se encontraron errores, enviando comentario en el PR..."
