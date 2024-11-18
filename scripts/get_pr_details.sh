@@ -5,9 +5,9 @@ EXERCISES=""
 LANGUAGE=""
 
 # Detectar el lenguaje
-if echo "$PR_BODY" | grep -q '\- \[X\] Java'; then
+if echo "$PR_BODY" | grep -q '\- \[X\]Java'; then
   LANGUAGE="java"
-elif echo "$PR_BODY" | grep -q '\- \[X\] JS'; then
+elif echo "$PR_BODY" | grep -q '\- \[X\]JS'; then
   LANGUAGE="javascript"
 else
   echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
