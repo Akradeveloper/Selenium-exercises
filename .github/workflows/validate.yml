@@ -25,7 +25,7 @@ jobs:
       - name: Obtener detalles del PR
         run: |
           chmod +x ./scripts/get_pr_details.sh
-          ./scripts/get_pr_details.sh ${{ github.event.pull_request.body }}
+          ./scripts/get_pr_details.sh "${{ github.event.pull_request.body }}"
       - name: Validar ejercicios seleccionados
         run: |
           ./scripts/validate_exercise.sh
