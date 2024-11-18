@@ -23,9 +23,14 @@ jobs:
       - name: Forzar permisos de ejecución
         run: |
           chmod -R +x ./scripts
-      - name: Obtener detalles del PR
-        run: |
-          ./scripts/get_pr_details.sh
+          - name: Obtener detalles del PR
+          run: |
+            chmod +x ./scripts/get_pr_details.sh
+            ./scripts/get_pr_details.sh
+          env:
+            PR_BODY: ${{ github.event.pull_request.body }}
+            PR_TITLE: ${{ github.event.pull_request.title }}
+            PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Validar ejercicios seleccionados
         run: |

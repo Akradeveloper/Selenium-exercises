@@ -1,14 +1,20 @@
 #!/bin/bash
+# Accede a las variables del PR pasadas como entorno
+PR_BODY="${PR_BODY}"
+PR_TITLE="${PR_TITLE}"
+PR_NUMBER="${PR_NUMBER}"
 
-# Obtener los detalles del PR
-PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+# Imprime los detalles
+echo "PR Body: $PR_BODY"
+echo "PR Title: $PR_TITLE"
+echo "PR Number: $PR_NUMBER"
 EXERCISES=""
 LANGUAGE=""
 
 # Detectar el lenguaje
-if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
+if echo "$PR_BODY" | grep -q '\- \[X\] Java'; then
   LANGUAGE="java"
-elif echo "$PR_DESCRIPTION" | grep -q '\- \[X\] JS'; then
+elif echo "$PR_BODY" | grep -q '\- \[X\] JS'; then
   LANGUAGE="javascript"
 else
   echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
@@ -17,7 +23,7 @@ fi
 
 # Detectar los ejercicios seleccionados
 for i in {1..9}; do
-  if echo "$PR_DESCRIPTION" | grep -q "\- \[X\] Ejercicio $i"; then
+  if echo "$PR_BODY" | grep -q "\- \[X\] Ejercicio $i"; then
     EXERCISES="$EXERCISES $i"
   fi
 done
