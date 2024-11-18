@@ -1,0 +1,99 @@
+name: PR Validation Workflow
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  # Job para analizar la descripción del PR
+  analyze-pr-description:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.set-pr-number.outputs.pr_number }}
+      language: ${{ steps.set-language.outputs.language }}
+      marked_exercises: ${{ steps.set-marked-exercises.outputs.marked_exercises }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run analyze-pr-description script
+        id: analyze-pr
+        run: |
+          # Ejecutar el script para analizar la descripción del PR
+          chmod +x ./scripts/analyze-pr-description.sh
+          ./scripts/analyze-pr-description.sh "${{ github.event.pull_request.body }}" # Pasa el cuerpo del PR como parámetro
+
+          # Almacenar los resultados como artefacto
+          echo "language=${LANGUAGE}" > pr_info.txt
+          echo "marked_exercises=${EXERCISES}" >> pr_info.txt
+          echo "pr_number=${{ github.event.pull_request.number }}" >> pr_info.txt
+
+      - name: Upload PR information as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr_info
+          path: pr_info.txt
+
+  # Job para validar los ejercicios
+  validate-pr:
+    needs: analyze-pr-description
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download PR information
+        uses: actions/download-artifact@v3
+        with:
+          name: pr_info
+          path: .
+
+      - name: Run validate-pr script
+        id: validate-pr
+        run: |
+          # Cargar los datos del artefacto
+          source pr_info.txt
+
+          # Ejecutar el script de validación de PR
+          chmod +x ./scripts/validate-pr.sh
+          ./scripts/validate-pr.sh "$LANGUAGE" "$EXERCISES" # Pasa el lenguaje y ejercicios como parámetros
+
+          # Subir los resultados de la validación
+          echo "error_flag=${ERROR_FLAG}" > validation_result.txt
+          echo "error_messages=${ERROR_MESSAGES}" >> validation_result.txt
+
+      - name: Upload validation results as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: validation_results
+          path: validation_result.txt
+
+  # Job para publicar los resultados en el PR
+  post-results:
+    needs: validate-pr
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download validation results
+        uses: actions/download-artifact@v3
+        with:
+          name: validation_results
+          path: .
+
+      - name: Run post-results script
+        run: |
+          # Cargar los resultados del artefacto
+          source validation_result.txt
+
+          # Ejecutar el script para publicar los resultados
+          chmod +x ./scripts/post-results.sh
+          ./scripts/post-results.sh "$ERROR_FLAG" "$ERROR_MESSAGES" "$PR_NUMBER" # Pasa el error_flag, error_messages y pr_number como parámetros
+
+  # Job para cerrar el PR en caso de errores
+  close-pr:
+    needs: post-results
+    if: ${{ needs.post-results.outputs.error_flag == '1' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run close-pr script
+        run: |
+          # Cerrar el PR si hay un error
+          chmod +x ./scripts/close-pr.sh
+          ./scripts/close-pr.sh "$PR_NUMBER" # Pasa el pr_number como parámetro
