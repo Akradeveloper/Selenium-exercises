@@ -8,9 +8,9 @@ jobs:
   analyze-pr-description:
     runs-on: ubuntu-latest
     outputs:
-      pr_number: ${{ steps.analyze-pr.outputs.pr_number }}
-      language: ${{ steps.analyze-pr.outputs.language }}
-      marked_exercises: ${{ steps.analyze-pr.outputs.marked_exercises }}
+      pr_number: ${{ steps.save-pr-info.outputs.pr_number }}
+      language: ${{ steps.save-pr-info.outputs.language }}
+      marked_exercises: ${{ steps.save-pr-info.outputs.marked_exercises }}
 
     steps:
       - name: Checkout code
@@ -21,14 +21,6 @@ jobs:
         run: |
           chmod +x ./scripts/analyze-pr-description.sh
           ./scripts/analyze-pr-description.sh "${{ github.event.pull_request.body }}" # Pasa el cuerpo del PR como parámetro
-
-      - name: Save PR information to file
-        id: save-pr-info
-        run: |
-          # El script ya debe haber definido las variables LANGUAGE y EXERCISES
-          echo "LANGUAGE=$LANGUAGE" > pr_info.txt
-          echo "EXERCISES=$EXERCISES" >> pr_info.txt
-          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> pr_info.txt
 
       - name: Upload PR information as artifact
         uses: actions/upload-artifact@v3
@@ -86,10 +78,7 @@ jobs:
 
       - name: Run post-results script
         run: |
-          # Cargar los resultados de validación
           source validation_result.txt
-
-          # Usar las variables cargadas
           chmod +x ./scripts/post-results.sh
           ./scripts/post-results.sh "$ERROR_FLAG" "$ERROR_MESSAGES" "$PR_NUMBER"
 
