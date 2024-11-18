@@ -1,8 +1,10 @@
 name: Post Results to PR
 
 on:
-  pull_request:
-    types: [synchronize]
+  workflow_run:
+    workflows: ["Validate Exercises"]
+    types:
+      - completed
 
 jobs:
   post-results:
@@ -10,13 +12,22 @@ jobs:
 
     steps:
       - name: Post validation results
+        id: post_results
         run: |
-          if [ $ERROR_FLAG -eq 1 ]; then
-            curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
-              -d "{\"body\": \"Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
+          ERROR_FLAG=${{ github.event.workflow_run.outputs.error_flag }}
+          ERROR_MESSAGES=${{ github.event.workflow_run.outputs.error_messages }}
+
+          if [ "$ERROR_FLAG" -eq "1" ]; then
+            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -d "{\"body\": \"❌ Errores encontrados en la validación del PR:\n$ERROR_MESSAGES\"}" \
               "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
-            exit 1
           else
-            curl -X POST -H "Authorization: token ${{ secrets.TOKEN_GITHUB }}" \
-              -d "{\"body\": \"Validación completada sin errores.\"}" \
+            curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -d "{\"body\": \"✅ Validación completada sin errores.\"}" \
               "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+
+          # Exportar estado para el siguiente workflow
+          echo "::set-output name=should_close::${ERROR_FLAG}"
+
+      - name: Set output for should_close
+        run: echo "should_close=${{ steps.post_results.outputs.should_close }}" >> $GITHUB_ENV

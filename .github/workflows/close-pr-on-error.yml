@@ -1,12 +1,14 @@
 name: Close PR on Error
 
 on:
-  pull_request:
-    types: [synchronize]
+  workflow_run:
+    workflows: ["Post Results to PR"]
+    types:
+      - completed
 
 jobs:
   close-pr:
-    if: failure()
+    if: ${{ github.event.workflow_run.outputs.should_close == '1' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -14,6 +16,6 @@ jobs:
         uses: peter-evans/close-pull@v3
         with:
           pull-request-number: ${{ github.event.pull_request.number }}
-          token: ${{ secrets.TOKEN_GITHUB }}
-          comment: Auto-closing pull request due to validation errors.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          comment: "❌ Auto-closing pull request due to validation errors."
           delete-branch: false

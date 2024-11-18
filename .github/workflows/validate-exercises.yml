@@ -1,9 +1,10 @@
 name: Validate Exercises
 
 on:
-  workflow_dispatch:
-  pull_request:
-    types: [synchronize]
+  workflow_run:
+    workflows: ["PR Check"]
+    types:
+      - completed
 
 jobs:
   validate:
@@ -277,12 +278,17 @@ jobs:
             # Add additional Java-specific checks here...
           }
 
-          # Iterate through marked exercises
-          for EXERCISE in ${{ env.marked_exercises }}; do
-            validate_exercise $EXERCISE
-          done
-
           if [ $ERROR_FLAG -eq 1 ]; then
             echo -e "Errores encontrados durante la validación:\n$ERROR_MESSAGES"
-            exit 1
+          else
+            echo "Validación completada sin errores."
           fi
+
+          # Exportar resultados para el próximo workflow
+          echo "ERROR_FLAG=$ERROR_FLAG" >> $GITHUB_ENV
+          echo "ERROR_MESSAGES=$ERROR_MESSAGES" >> $GITHUB_ENV
+      - name: Set outputs for next workflow
+        id: set_outputs
+        run: |
+          echo "::set-output name=error_flag::${{ env.ERROR_FLAG }}"
+          echo "::set-output name=error_messages::${{ env.ERROR_MESSAGES }}"

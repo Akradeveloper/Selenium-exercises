@@ -28,7 +28,7 @@ jobs:
 
           # Detectar ejercicios
           EXERCISES=""
-          for i in {1..5}; do
+          for i in {1..9}; do
             if echo "$PR_DESCRIPTION" | grep -q "\- \[X\] Ejercicio $i"; then
               EXERCISES="$EXERCISES $i"
             fi
@@ -43,3 +43,9 @@ jobs:
         run: |
           echo "Lenguaje detectado: ${{ env.language }}"
           echo "Ejercicios marcados: ${{ env.marked_exercises }}"
+
+      - name: Set outputs
+        id: set_outputs
+        run: |
+          echo "::set-output name=language::${{ env.language }}"
+          echo "::set-output name=marked_exercises::${{ env.marked_exercises }}"
