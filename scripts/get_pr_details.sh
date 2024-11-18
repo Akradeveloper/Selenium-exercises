@@ -1,14 +1,6 @@
 #!/bin/bash
 
-# Accede a las variables del PR pasadas como entorno
-PR_BODY="${PR_BODY}"
-PR_TITLE="${PR_TITLE}"
-PR_NUMBER="${PR_NUMBER}"
-
-# Imprime los detalles
-echo "PR Body: $PR_BODY"
-echo "PR Title: $PR_TITLE"
-echo "PR Number: $PR_NUMBER"
+PR_BODY=$1
 EXERCISES=""
 LANGUAGE=""
 
