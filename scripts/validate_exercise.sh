@@ -260,7 +260,7 @@ done
 
 # Si hubo errores, guardamos en el archivo de errores
 if [ $ERROR_FLAG -eq 1 ] || [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
-  echo -e "$ERROR_MESSAGES" > validation_errors.txt
+  echo -e "$ERROR_MESSAGES" | tee validation_errors.txt
   echo "Errores encontrados y guardados en validation_errors.txt."
   # Mostrar el contenido del archivo validation_errors.txt en los logs
   cat validation_errors.txt
