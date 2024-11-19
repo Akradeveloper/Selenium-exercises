@@ -14,6 +14,10 @@ validate_exercise() {
   EXERCISE=$1
   FOLDER="./ejercicio-$EXERCISE"
   
+  
+
+  # Validación específica según el lenguaje
+  if [ "$LANGUAGE" == "java" ]; then
   # Comprobación de directorios y archivos necesarios
   if [ ! -d "$FOLDER/src/pages" ]; then
     ERROR_MESSAGES+="\nERROR: Falta el directorio src/pages en $FOLDER"
@@ -52,9 +56,6 @@ validate_exercise() {
     ERROR_MESSAGES+="\nWARNING: No se encontraron comentarios en el código de $FOLDER"
     echo "WARNING: No se encontraron comentarios en el código de $FOLDER"
   fi
-
-  # Validación específica según el lenguaje
-  if [ "$LANGUAGE" == "java" ]; then
     if ! grep -q 'org.seleniumhq.selenium' "$FOLDER/pom.xml" && ! grep -q 'selenium-java' "$FOLDER/build.gradle"; then
       ERROR_MESSAGES+="\nERROR: Falta la dependencia de Selenium en el archivo pom.xml o build.gradle (Java)"
       echo "ERROR: Falta la dependencia de Selenium en el archivo pom.xml o build.gradle (Java)"
