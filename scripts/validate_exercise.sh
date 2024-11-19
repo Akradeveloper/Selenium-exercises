@@ -14,61 +14,77 @@ validate_exercise() {
   EXERCISE=$1
   FOLDER="./ejercicio-$EXERCISE"
   
-  
-
-  # Validación específica según el lenguaje
-  if [ "$LANGUAGE" == "java" ]; then
-    java_validation $EXERCISE $FOLDER
-  elif [ "$LANGUAGE" == "javascript" ]; then
-    javascript_validation $EXERCISE $FOLDER
-  fi
-}
-
-# Función para la validación en Java
-java_validation() {
-  EXERCISE=$1
-  FOLDER=$2
   # Comprobación de directorios y archivos necesarios
   if [ ! -d "$FOLDER/src/pages" ]; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
+    ERROR_MESSAGES+="\nERROR: Falta el directorio src/pages en $FOLDER"
+    echo "ERROR: Falta el directorio src/pages en $FOLDER"
     ERROR_FLAG=1
   fi
   if [ ! -d "$FOLDER/src/tests" ]; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
+    ERROR_MESSAGES+="\nERROR: Falta el directorio src/tests en $FOLDER"
+    echo "ERROR: Falta el directorio src/tests en $FOLDER"
     ERROR_FLAG=1
   fi
   if [ ! -f "$FOLDER/.gitignore" ]; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: Falta el archivo .gitignore en $FOLDER"
+    ERROR_MESSAGES+="\nERROR: Falta el archivo .gitignore en $FOLDER"
+    echo "ERROR: Falta el archivo .gitignore en $FOLDER"
     ERROR_FLAG=1
   fi
 
   # Validaciones específicas para no permitir archivos de solución o ejemplos
   if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
+    ERROR_MESSAGES+="\nERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
+    echo "ERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
     ERROR_FLAG_EXERCISE=1
   fi
   if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
+    ERROR_MESSAGES+="\nERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
+    echo "ERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
     ERROR_FLAG_EXERCISE=1
   fi
 
   # Validación de comentarios en el código
   if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios de clase en el código de $FOLDER"
+    ERROR_MESSAGES+="\nWARNING: No se encontraron comentarios de clase en el código de $FOLDER"
+    echo "WARNING: No se encontraron comentarios de clase en el código de $FOLDER"
   fi
   if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios en el código de $FOLDER"
+    ERROR_MESSAGES+="\nWARNING: No se encontraron comentarios en el código de $FOLDER"
+    echo "WARNING: No se encontraron comentarios en el código de $FOLDER"
   fi
-  # Comprobar si el archivo pom.xml o build.gradle tiene dependencia de Selenium
+
+  # Validación específica según el lenguaje
+  if [ "$LANGUAGE" == "java" ]; then
     if ! grep -q 'org.seleniumhq.selenium' "$FOLDER/pom.xml" && ! grep -q 'selenium-java' "$FOLDER/build.gradle"; then
-      ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: Falta la dependencia de Selenium en el archivo pom.xml o build.gradle (Java)"
+      ERROR_MESSAGES+="\nERROR: Falta la dependencia de Selenium en el archivo pom.xml o build.gradle (Java)"
+      echo "ERROR: Falta la dependencia de Selenium en el archivo pom.xml o build.gradle (Java)"
       ERROR_FLAG=1
     fi
-    # Validar uso de System.setProperty y new ChromeDriver()
     if ! grep -q 'System.setProperty("webdriver.chrome.driver"' "$FOLDER/src" || ! grep -q 'new ChromeDriver()' "$FOLDER/src"; then
-      ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: No se encontró configuración correcta de ChromeDriver en el código Java"
+      ERROR_MESSAGES+="\nERROR: No se encontró configuración correcta de ChromeDriver en el código Java"
+      echo "ERROR: No se encontró configuración correcta de ChromeDriver en el código Java"
       ERROR_FLAG=1
     fi
+    java_validation $EXERCISE $FOLDER
+
+  elif [ "$LANGUAGE" == "javascript" ]; then
+    if [ ! -f "$FOLDER/package.json" ] || ! grep -q '"selenium-webdriver"' "$FOLDER/package.json"; then
+      ERROR_MESSAGES+="\nERROR: Falta la dependencia de selenium-webdriver en package.json (JavaScript)"
+      echo "ERROR: Falta la dependencia de selenium-webdriver en package.json (JavaScript)"
+      ERROR_FLAG=1
+    fi
+    if ! grep -q "require('selenium-webdriver/chrome')" "$FOLDER/src" || ! grep -q "new Builder().forBrowser('chrome')" "$FOLDER/src"; then
+      ERROR_MESSAGES+="\nERROR: No se encontró configuración correcta de ChromeDriver en el código JavaScript"
+      echo "ERROR: No se encontró configuración correcta de ChromeDriver en el código JavaScript"
+      ERROR_FLAG=1
+    fi
+    javascript_validation $EXERCISE $FOLDER
+  fi
+}
+# Función para la validación en Java
+java_validation() {
+  EXERCISE=$1
+  FOLDER=$2
  # Ejecución de mvn checkstyle y captura de errores
     mvn -f "$FOLDER/pom.xml" checkstyle:check
     if [ $? -ne 0 ]; then
@@ -240,47 +256,6 @@ java_validation() {
 javascript_validation() {
   EXERCISE=$1
   FOLDER=$2
-  # Comprobar si package.json tiene la dependencia de selenium-webdriver
-    if [ ! -f "$FOLDER/package.json" ] || ! grep -q '"selenium-webdriver"' "$FOLDER/package.json"; then
-      ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: Falta la dependencia de selenium-webdriver en package.json (JavaScript)"
-      ERROR_FLAG=1
-    fi
-    # Validar inicialización del ChromeDriver en código JS
-    if ! grep -q "require('selenium-webdriver/chrome')" "$FOLDER/src" || ! grep -q "new Builder().forBrowser('chrome')" "$FOLDER/src"; then
-      ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: No se encontró configuración correcta de ChromeDriver en el código JavaScript"
-      ERROR_FLAG=1
-    fi
-    # Comprobación de directorios y archivos necesarios
-  if [ ! -d "$FOLDER/src/pages" ]; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: Falta el directorio src/pages en $FOLDER"
-    ERROR_FLAG=1
-  fi
-  if [ ! -d "$FOLDER/src/tests" ]; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: Falta el directorio src/tests en $FOLDER"
-    ERROR_FLAG=1
-  fi
-  if [ ! -f "$FOLDER/.gitignore" ]; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: Falta el archivo .gitignore en $FOLDER"
-    ERROR_FLAG=1
-  fi
-
-  # Validaciones específicas para no permitir archivos de solución o ejemplos
-  if find "$FOLDER" -type f -name "*solution*" | grep -q .; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: No debe haber archivos de solución (e.g., solution.java) en $FOLDER"
-    ERROR_FLAG_EXERCISE=1
-  fi
-  if find "$FOLDER" -type f -name "*test_example*" | grep -q .; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nERROR: No debe haber archivos de test de ejemplo (e.g., test_example.js) en $FOLDER"
-    ERROR_FLAG_EXERCISE=1
-  fi
-
-  # Validación de comentarios en el código
-  if ! grep -r "/\*.*\*/" "$FOLDER/src" >/dev/null 2>&1; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios de clase en el código de $FOLDER"
-  fi
-  if ! grep -r "//.*" "$FOLDER/src" >/dev/null 2>&1; then
-    ERROR_MESSAGES+="$ERROR_MESSAGES\nWARNING: No se encontraron comentarios en el código de $FOLDER"
-  fi
   # Aquí agregas las validaciones JavaScript adicionales si las necesitas
   # Si detectas errores adicionales, añádelos a ERROR_MESSAGES
 }
@@ -292,7 +267,7 @@ done
 
 # Si hubo errores, guardamos en el archivo de errores
 if [ $ERROR_FLAG -eq 1 ] || [ $ERROR_FLAG_EXERCISE -eq 1 ]; then
-  echo -e "$ERROR_MESSAGES" | tee validation_errors.txt
+  echo -e "$ERROR_MESSAGES" > validation_errors.txt
   echo "Errores encontrados y guardados en validation_errors.txt."
   # Mostrar el contenido del archivo validation_errors.txt en los logs
   cat validation_errors.txt
