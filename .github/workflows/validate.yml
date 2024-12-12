@@ -33,4 +33,4 @@ jobs:
         run: |
           errores=$(cat validation_errors.txt)  
           echo $errores
-          ./scripts/close_pr.sh "${{ secrets.TOKEN_GITHUB }}" "${{ github.repository }}" ${{ github.event.pull_request.number }} "$(cat validation_errors.txt)"
+          ./scripts/close_pr.sh "${{ secrets.TOKEN_GITHUB }}" "${{ github.repository }}" "${{ github.event.pull_request.number }}" "$errores"
