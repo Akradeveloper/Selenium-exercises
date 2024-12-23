@@ -39,7 +39,7 @@ jobs:
         id: validate_exercises
         run: |
           for exercise in ${{ env.exercises }}; do
-            python "scripts/validate_exercise_$exercise.py" ./ ${{ env.language }} >> exercise_errors.txt || true
+            python "scripts/validate_exercise_$exercise.py" ./ejercicio-$exercise ${{ env.language }} >> exercise_errors.txt || true
           done
 
       - name: Procesar errores
