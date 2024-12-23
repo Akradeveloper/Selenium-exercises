@@ -57,12 +57,16 @@ jobs:
             echo "¡Validación exitosa!" 
             echo "validation_status=success" >> $GITHUB_ENV
           fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Agregar el token aquí
 
       - name: Establecer estado del PR
         if: ${{ env.validation_status == 'failure' }}
         run: |
           echo "Estableciendo estado de validación como fallo..."
           gh pr review ${{ github.event.pull_request.number }} --request-changes --body "Errores encontrados. Por favor corrige antes de volver a enviar."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Agregar el token aquí
 
       - name: Aprobar PR
         if: ${{ env.validation_status == 'success' }}
