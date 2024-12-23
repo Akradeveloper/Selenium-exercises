@@ -45,21 +45,18 @@ jobs:
       - name: Procesar errores
         id: process_errors
         run: |
-            # Combinar errores
-            cat general_errors.txt exercise_errors.txt > all_errors.txt || true
+          # Combinar errores
+          cat general_errors.txt exercise_errors.txt > all_errors.txt || true
 
-            # Agregar comentario al PR si hay errores
-            if [ -s all_errors.txt ]; then
-              echo "Se encontraron errores en la validación. Publicando comentario..."
-              gh pr comment ${{ github.event.pull_request.number }} --body "$(cat all_errors.txt)" --repo Akradeveloper/Selenium-exercises
-              echo "validation_status=failure" >> $GITHUB_ENV
-            else
-              echo "¡Validación exitosa!" 
-              echo "validation_status=success" >> $GITHUB_ENV
-            fi
-          shell: /usr/bin/bash -e {0}
-          env:
-            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Agregar el token aquí
+          # Agregar comentario al PR si hay errores
+          if [ -s all_errors.txt ]; then
+            echo "Se encontraron errores en la validación. Publicando comentario..."
+            gh pr comment ${{ github.event.pull_request.number }} --body "$(cat all_errors.txt)" --repo Akradeveloper/Selenium-exercises
+            echo "validation_status=failure" >> $GITHUB_ENV
+          else
+            echo "¡Validación exitosa!" 
+            echo "validation_status=success" >> $GITHUB_ENV
+          fi
 
       - name: Establecer estado del PR
         if: ${{ env.validation_status == 'failure' }}
@@ -72,3 +69,5 @@ jobs:
         run: |
           echo "Aprobando PR..."
           gh pr review ${{ github.event.pull_request.number }} --approve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Agregar el token aquí
