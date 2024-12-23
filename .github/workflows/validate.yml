@@ -41,6 +41,7 @@ jobs:
           for exercise in ${{ env.exercises }}; do
             python "scripts/validate_exercise_$exercise.py" ./ ${{ env.language }} >> exercise_errors.txt || true
           done
+
       - name: Procesar errores
         id: process_errors
         run: |
@@ -49,8 +50,8 @@ jobs:
 
             # Agregar comentario al PR si hay errores
             if [ -s all_errors.txt ]; then
-              echo "Se encontraron errores en la validación. Publicando comentario..." 
-              gh pr comment 68 --body "$(cat all_errors.txt)" --repo Akradeveloper/Selenium-exercises
+              echo "Se encontraron errores en la validación. Publicando comentario..."
+              gh pr comment ${{ github.event.pull_request.number }} --body "$(cat all_errors.txt)" --repo Akradeveloper/Selenium-exercises
               echo "validation_status=failure" >> $GITHUB_ENV
             else
               echo "¡Validación exitosa!" 
