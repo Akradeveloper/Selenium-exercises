@@ -1,0 +1,48 @@
+name: Validar Ejercicio 2
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate_ejercicio_2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Detectar lenguaje
+        id: detect_language
+        run: |
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+          if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Java'; then
+            echo "language=java" >> $GITHUB_ENV
+          elif echo "$PR_DESCRIPTION" | grep -q '\- \[X\] JS'; then
+            echo "language=javascript" >> $GITHUB_ENV
+          else
+            echo "ERROR: No se especificó el lenguaje de programación o más de uno fue marcado."
+            exit 1
+
+      - name: Verificar Ejercicio 2
+        id: check_exercise
+        run: |
+          PR_DESCRIPTION="${{ github.event.pull_request.body }}"
+          if echo "$PR_DESCRIPTION" | grep -q '\- \[X\] Ejercicio 2'; then
+            echo "Ejercicio 2 marcado."
+          else
+            echo "Ejercicio 2 no marcado. Saliendo..."
+            exit 0
+
+      - name: Validar Ejercicio 2
+        run: |
+          chmod +x scripts/validate_exercise.sh
+          ./scripts/validate_exercise.sh ${{ env.language }} 2 || exit 1
+
+      - name: Publicar resultados en el PR
+        if: always()
+        run: |
+          if [ $? -eq 0 ]; then
+            gh pr comment ${{ github.event.pull_request.number }} --body "### ✅ Validación exitosa para Ejercicio 2 en ${{ env.language }}."
+          else
+            gh pr comment ${{ github.event.pull_request.number }} --body "### ❌ Fallos en la validación para Ejercicio 2 en ${{ env.language }}."
