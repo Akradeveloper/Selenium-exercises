@@ -37,6 +37,7 @@ jobs:
           else
             echo "Ejercicio 1 no marcado. Saliendo..."
             exit 0
+          fi
 
       # 4. Validar el ejercicio 1 según el lenguaje
       - name: Validar ejercicios seleccionados
