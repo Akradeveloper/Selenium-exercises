@@ -33,7 +33,9 @@ jobs:
       - name: Validar general
         id: validate_general
         run: |
-          python scripts/validate_general.py ./ ${{ env.language }} > general_errors.txt || true
+          for exercise in ${{ env.exercises }}; do
+            python scripts/validate_general.py ./ejercicio-$exercise ${{ env.language }} > general_errors.txt || true
+          done
 
       - name: Validar ejercicios seleccionados
         id: validate_exercises
