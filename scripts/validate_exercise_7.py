@@ -35,7 +35,7 @@ if __name__ == "__main__":
     language = sys.argv[2]
     exercise_errors = validate_exercise_7(base_path, language)
     if exercise_errors:
-        print("Errores del Ejercicio 1:")
+        print("Errores del Ejercicio 7:")
         for error in exercise_errors:
             print(f"- {error}")
         sys.exit(1)
