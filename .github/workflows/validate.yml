@@ -36,13 +36,13 @@ jobs:
       - name: Validar general
         id: validate_general
         run: |
-          python validate_general.py ./ ${{ env.language }} > general_errors.txt || true
+          python ./scripts/validate_general.py ./ ${{ env.language }} > general_errors.txt || true
 
       - name: Validar ejercicios seleccionados
         id: validate_exercises
         run: |
           for exercise in ${{ env.exercises }}; do
-            python "validate_exercise_$exercise.py" ./ ${{ env.language }} >> exercise_errors.txt || true
+            python "./scripts/validate_exercise_$exercise.py" ./ ${{ env.language }} >> exercise_errors.txt || true
           done
 
       - name: Procesar errores
