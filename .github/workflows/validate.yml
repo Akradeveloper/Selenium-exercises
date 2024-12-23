@@ -42,9 +42,9 @@ jobs:
             python "scripts/validate_exercise_$exercise.py" ./ ${{ env.language }} >> exercise_errors.txt || true
           done
 
-        - name: Procesar errores
-          id: process_errors
-          run: |
+      - name: Procesar errores
+        id: process_errors
+        run: |
             # Combinar errores
             cat general_errors.txt exercise_errors.txt > all_errors.txt || true
 
